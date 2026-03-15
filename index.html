@@ -11,13 +11,16 @@
   --bg: #080d1a;
   --card-bg: #0f1827;
   --card-border: #1a2d45;
-  --card-border-done: #064e3b;
+  --card-border-done: #1a4a7a;
   --text: #dde6f0;
   --text-muted: #506070;
   --accent: #5ba3d9;
   --accent-dark: #1a3a60;
-  --success: #34d399;
-  --success-bg: rgba(6, 78, 59, 0.4);
+  --success: #7dd3fc;
+  --success-bg: rgba(125, 211, 252, 0.15);
+  --done-border: #1a4a7a;
+  --done-hover-border: #2563a8;
+  --done-bg: rgba(125, 211, 252, 0.12);
   --warning: #f0b429;
   --snow: #eaf3f8;
 }
@@ -123,7 +126,7 @@ main {
 }
 .group-card:hover { border-color: #2a4a70; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
 .group-card.all-done { border-color: var(--card-border-done); }
-.group-card.all-done:hover { border-color: #0a7a52; }
+.group-card.all-done:hover { border-color: var(--done-hover-border); }
 
 .card-svg-wrap {
   width: 100%;
@@ -234,9 +237,9 @@ main {
 .peak-date-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
 .peak-date-btn.has-date {
   border-style: solid;
-  border-color: #065f46;
+  border-color: var(--done-border);
   color: var(--success);
-  background: rgba(6,78,59,0.2);
+  background: var(--done-bg);
 }
 .group-log-btn {
   width: 100%;
@@ -252,7 +255,7 @@ main {
   text-align: center;
 }
 .group-log-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
-.group-log-btn.group-done { border-style: solid; border-color: #065f46; color: var(--success); background: rgba(6,78,59,0.15); }
+.group-log-btn.group-done { border-style: solid; border-color: var(--done-border); color: var(--success); background: var(--done-bg); }
 
 /* ── Modal ── */
 .modal-overlay {
@@ -1743,17 +1746,29 @@ function checkCompletion(prevDone, nowDone) {
 function applyMode(m) {
   const root = document.documentElement.style;
   if (m === 'summer') {
-    root.setProperty('--accent', '#4caf7d');
-    root.setProperty('--accent-dark', '#1b4d30');
-    root.setProperty('--bg', '#070d07');
-    root.setProperty('--card-bg', '#0d150d');
-    root.setProperty('--card-border', '#1a2e1a');
+    root.setProperty('--accent',            '#4caf7d');
+    root.setProperty('--accent-dark',       '#1b4d30');
+    root.setProperty('--bg',                '#070d07');
+    root.setProperty('--card-bg',           '#0d150d');
+    root.setProperty('--card-border',       '#1a2e1a');
+    root.setProperty('--success',           '#34d399');
+    root.setProperty('--success-bg',        'rgba(6,78,59,0.4)');
+    root.setProperty('--card-border-done',  '#064e3b');
+    root.setProperty('--done-border',       '#065f46');
+    root.setProperty('--done-hover-border', '#0a7a52');
+    root.setProperty('--done-bg',           'rgba(6,78,59,0.2)');
   } else {
     root.removeProperty('--accent');
     root.removeProperty('--accent-dark');
     root.removeProperty('--bg');
     root.removeProperty('--card-bg');
     root.removeProperty('--card-border');
+    root.removeProperty('--success');
+    root.removeProperty('--success-bg');
+    root.removeProperty('--card-border-done');
+    root.removeProperty('--done-border');
+    root.removeProperty('--done-hover-border');
+    root.removeProperty('--done-bg');
   }
   document.querySelector('.header-title h1').textContent =
     m === 'summer' ? 'ADK 46er' : 'ADK Winter 46';
