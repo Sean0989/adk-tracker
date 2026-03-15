@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADK Winter 46</title>
+<title>ADK Winter 46er</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -919,7 +919,7 @@ main {
 
 <header>
   <div class="header-title">
-    <h1>ADK Winter 46</h1>
+    <h1>ADK Winter 46er</h1>
     <p>High Peaks Progress Tracker</p>
   </div>
   <div class="progress-container">
@@ -935,18 +935,14 @@ main {
   </div>
   <div class="mode-toggle" id="modeToggle">
     <button class="mode-tog" data-mode="summer" onclick="setMode('summer')">46er</button>
-    <button class="mode-tog active" data-mode="winter" onclick="setMode('winter')">Winter 46</button>
+    <button class="mode-tog active" data-mode="winter" onclick="setMode('winter')">Winter 46er</button>
   </div>
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="tracker" onclick="switchTab('tracker')">Tracker</button>
-    <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Stats</button>
+    <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Stats/Settings</button>
   </nav>
   <div class="header-actions">
-    <button class="btn btn-ghost" onclick="exportData()">Export</button>
-    <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Import</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <a href="map.html" class="btn btn-ghost">Map View</a>
-    <button id="_syncHeaderBtn" class="btn btn-ghost" onclick="openSyncModal()">⟳ Sync</button>
   </div>
 </header>
 
@@ -954,15 +950,25 @@ main {
 <section id="statsPanel"></section>
 <section id="settingsPanel">
   <div class="settings-section">
+    <h2>Data</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-ghost" onclick="exportData()">Export</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button id="_syncHeaderBtn" class="btn btn-ghost" onclick="openSyncModal()">⟳ Sync</button>
+    </div>
+    <p class="settings-note">Export saves a JSON backup. Import restores from one. Sync links devices via GitHub Gist.</p>
+  </div>
+  <div class="settings-section">
     <h2>Mode</h2>
     <div class="mode-cards">
       <div class="mode-card" data-mode="winter" onclick="setMode('winter')">
-        <div class="mode-card-label">Winter 46</div>
-        <div class="mode-card-desc">Restricts dates to the official winter season (Dec 21 – Mar 21). Cool blue palette with northern lights celebration.</div>
+        <div class="mode-card-label">Winter 46er</div>
+        <div class="mode-card-desc">Restricts dates to the official winter season (Dec 21 – Mar 21).</div>
       </div>
       <div class="mode-card" data-mode="summer" onclick="setMode('summer')">
         <div class="mode-card-label">46er</div>
-        <div class="mode-card-desc">Accepts any date, any season. Green palette with summer summit celebration.</div>
+        <div class="mode-card-desc">Accepts any date, any season.</div>
       </div>
     </div>
     <p class="settings-note">Switching modes keeps all logged dates.</p>
@@ -1270,7 +1276,7 @@ const GROUPS = [
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let winterCompletions = {}; // { "PeakName": "YYYY-MM-DD" } — Winter 46 store
+let winterCompletions = {}; // { "PeakName": "YYYY-MM-DD" } — Winter 46er store
 let summerCompletions = {}; // { "PeakName": "YYYY-MM-DD" } — 46er store
 let completions = winterCompletions; // reference to active store
 let mode = 'winter'; // 'winter' | 'summer'
@@ -1506,7 +1512,7 @@ function saveDate() {
     } else if (_peak) {
       completions[_peak] = v;
     }
-    // Cross-populate: winter dates carry into 46er, winter-valid 46er dates carry into Winter 46
+    // Cross-populate: winter dates carry into 46er, winter-valid 46er dates carry into Winter 46er
     const otherStore = mode === 'winter' ? summerCompletions : winterCompletions;
     const syncPeaks = _modalMode === 'group' && _groupId !== null
       ? GROUPS.find(g => g.id === _groupId).peaks
@@ -1609,10 +1615,9 @@ document.addEventListener('mousemove', e => {
 function switchTab(tab) {
   document.getElementById('groupGrid').style.display = tab === 'tracker' ? '' : 'none';
   document.getElementById('statsPanel').style.display = tab === 'stats' ? 'block' : 'none';
-  document.getElementById('settingsPanel').style.display = tab === 'settings' ? 'block' : 'none';
+  document.getElementById('settingsPanel').style.display = tab === 'stats' ? 'block' : 'none';
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  if (tab === 'stats') renderStats();
-  if (tab === 'settings') renderSettings();
+  if (tab === 'stats') { renderStats(); renderSettings(); }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -1771,7 +1776,7 @@ function applyMode(m) {
     root.removeProperty('--done-bg');
   }
   document.querySelector('.header-title h1').textContent =
-    m === 'summer' ? 'ADK 46er' : 'ADK Winter 46';
+    m === 'summer' ? 'ADK 46er' : 'ADK Winter 46er';
   document.querySelectorAll('.mode-tog').forEach(b =>
     b.classList.toggle('active', b.dataset.mode === m));
 }

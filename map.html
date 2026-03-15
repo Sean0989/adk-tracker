@@ -315,7 +315,7 @@ header {
 
 <header>
   <div class="header-title">
-    <h1 id="titleText">ADK Winter 46</h1>
+    <h1 id="titleText">ADK Winter 46er</h1>
     <p id="subtitleText">High Peaks — Geographic Map View</p>
   </div>
 
@@ -582,7 +582,7 @@ function setMode(m) {
   saveState();
   document.getElementById('togWinter').classList.toggle('active', m === 'winter');
   document.getElementById('togSummer').classList.toggle('active', m === 'summer');
-  document.getElementById('titleText').textContent = m === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+  document.getElementById('titleText').textContent = m === 'winter' ? 'ADK Winter 46er' : 'ADK 46er';
   updateHeader();
   renderMap();
 }
@@ -998,7 +998,7 @@ function doImport(e) {
       applyMode(mode);
       document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
       document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
-      document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+      document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46er' : 'ADK 46er';
       updateHeader();
       renderMap();
     } catch(err) {
@@ -1016,7 +1016,7 @@ window.addEventListener('storage', e => {
   applyMode(mode);
   document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
   document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
-  document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+  document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46er' : 'ADK 46er';
   updateHeader();
   renderMap();
 });
@@ -1044,14 +1044,14 @@ syncInit({
     applyMode(mode);
     document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
     document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
-    document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+    document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46er' : 'ADK 46er';
     updateHeader();
     renderMap();
   }
 });
 document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
 document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
-document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46er' : 'ADK 46er';
 updateHeader();
 renderMap();
 </script>
