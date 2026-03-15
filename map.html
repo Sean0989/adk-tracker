@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADK 46 Tracker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080d1a;
+  --card-bg: #0f1827;
+  --card-border: #1a2d45;
+  --card-border-done: #064e3b;
+  --text: #dde6f0;
+  --text-muted: #506070;
+  --accent: #5ba3d9;
+  --accent-dark: #1a3a60;
+  --confirm-hover: #1e4a78;
+  --success: #34d399;
+  --success-bg: rgba(6, 78, 59, 0.4);
+  --warning: #f0b429;
+  --snow: #eaf3f8;
+  --peak-fill: #5ba3d9;
+  --peak-glow: rgba(91,163,217,0.55);
+  --header-top: #0b1428;
+  --progress-bg: #0d1e33;
+  --input-bg: #070d18;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+  padding: 12px 20px 10px;
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: nowrap;
+  background: linear-gradient(180deg, var(--header-top) 0%, var(--bg) 100%);
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+.header-title h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--snow);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.header-title p {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.progress-container { flex: 1 1 200px; min-width: 0; }
+.progress-bar-wrap {
+  background: var(--progress-bg);
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+.progress-sub {
+  display: flex;
+  gap: 14px;
+  margin-top: 5px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+.progress-sub b { color: var(--text); }
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.btn {
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  font-size: 0.73rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-link {
+  background: transparent;
+  color: var(--text-muted);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-link:hover { border-color: var(--accent); color: var(--accent); }
+.btn-confirm {
+  background: var(--accent-dark);
+  color: var(--snow);
+  border-color: var(--accent-dark);
+}
+.btn-confirm:hover { background: var(--confirm-hover); }
+.btn-danger {
+  background: transparent;
+  color: #e05555;
+  border-color: #3a1a1a;
+}
+.btn-danger:hover { border-color: #e05555; background: rgba(224,85,85,0.1); }
+
+/* ── Mode toggle ── */
+.mode-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 7px;
+  padding: 2px;
+  flex: 0 0 auto;
+}
+.mode-tog {
+  padding: 4px 11px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.73rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mode-tog.active { background: var(--accent-dark); color: var(--snow); }
+.mode-tog:hover:not(.active) { color: var(--accent); }
+
+/* ── Map area ── */
+#mapArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#mapSvg {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  display: block;
+}
+#mapSvg:active { cursor: grabbing; }
+
+/* ── Tooltip ── */
+#mapTooltip {
+  position: fixed;
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 0.75rem;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 300;
+  max-width: 210px;
+  line-height: 1.8;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.65);
+}
+#mapTooltip .tip-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--snow);
+  margin-bottom: 2px;
+}
+#mapTooltip .tip-group {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+#mapTooltip .tip-date {
+  color: var(--success);
+  font-size: 0.7rem;
+}
+#mapTooltip .tip-cta {
+  color: var(--accent);
+  font-size: 0.7rem;
+}
+
+/* ── Reset view button ── */
+#resetViewBtn {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 50;
+  background: color-mix(in srgb, var(--card-bg) 80%, transparent);
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+}
+#resetViewBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Peak labels: hidden by default, shown when zoomed in */
+.peak-labels { opacity: 0; transition: opacity 0.25s; }
+#mapSvg.show-labels .peak-labels { opacity: 1; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 22px 24px;
+  width: 320px;
+  max-width: 94vw;
+}
+.modal h3 { font-size: 1rem; color: var(--snow); margin-bottom: 3px; }
+.modal .modal-sub { font-size: 0.74rem; color: var(--text-muted); margin-bottom: 14px; }
+.modal input[type="date"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+  color-scheme: dark;
+}
+.modal input[type="date"]:focus { outline: none; border-color: var(--accent); }
+
+.modal-error {
+  display: none;
+  color: #f0b429;
+  font-size: 0.73rem;
+  margin-bottom: 10px;
+  padding: 6px 9px;
+  background: rgba(240,180,41,0.08);
+  border: 1px solid rgba(240,180,41,0.25);
+  border-radius: 5px;
+  line-height: 1.4;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+.modal-group-btn {
+  width: 100%;
+  padding: 7px 10px;
+  background: none;
+  border: 1px dashed var(--card-border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.73rem;
+  transition: all 0.15s;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.modal-group-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid var(--card-border);
+  margin: 12px 0;
+}
+
+/* ── Import hidden input ── */
+#importInput { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1 id="titleText">ADK Winter 46</h1>
+    <p id="subtitleText">High Peaks — Geographic Map View</p>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="progress-sub">
+      <span><b id="statPeaks">0</b>/46 peaks</span>
+      <span><b id="statGroups">0</b>/21 groups</span>
+      <span><b id="statMiles">0</b> mi logged</span>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <div class="mode-toggle">
+      <button class="mode-tog active" id="togWinter" onclick="setMode('winter')">Winter</button>
+      <button class="mode-tog" id="togSummer" onclick="setMode('summer')">Summer</button>
+    </div>
+    <button class="btn btn-ghost" onclick="doExport()">Export</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('importInput').click()">Import</button>
+    <input type="file" id="importInput" accept=".json" onchange="doImport(event)">
+    <a href="index.html" class="btn btn-ghost btn-link">Card View</a>
+  </div>
+</header>
+
+<div id="mapArea">
+  <svg id="mapSvg" viewBox="0 0 960 760" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <filter id="peakGlow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="peakGlowGreen" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <radialGradient id="mapGlow" cx="60%" cy="55%" r="42%">
+        <stop offset="0%" stop-color="#0d2a4a" stop-opacity="0.7"/>
+        <stop offset="100%" stop-color="#060c18" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <g id="mapContent">
+      <!-- rendered by JS -->
+    </g>
+  </svg>
+
+  <button id="resetViewBtn" onclick="resetView()">⌖ Reset View</button>
+</div>
+
+<!-- Tooltip -->
+<div id="mapTooltip"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <h3 id="modalTitle">Peak Name</h3>
+    <div class="modal-sub" id="modalSub">Group name</div>
+
+    <button class="modal-group-btn" id="modalGroupBtn" style="display:none" onclick="openGroupModal()"></button>
+    <hr class="modal-divider" id="modalDivider" style="display:none">
+
+    <input type="date" id="modalDate">
+    <div class="modal-error" id="modalError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="modalClearBtn" onclick="clearDate()">Clear</button>
+      <button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-confirm" onclick="saveDate()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Group modal -->
+<div class="modal-overlay" id="groupModalOverlay" onclick="closeGroupModal(event)">
+  <div class="modal" id="groupModalBox">
+    <h3 id="groupModalTitle">Log Group</h3>
+    <div class="modal-sub" id="groupModalSub"></div>
+    <input type="date" id="groupModalDate">
+    <div class="modal-error" id="groupModalError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGroupModalDirect()">Cancel</button>
+      <button class="btn btn-confirm" onclick="saveGroupDate()">Log All Peaks</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+
+const GROUPS = [
+  { id:1,  name:"Cascade & Porter",    trailhead:"Rt 73 trailhead",           distance_mi:5.7,  elev_gain_ft:2286, note:null,
+    peaks:[{name:"Cascade",elev:4098},{name:"Porter",elev:4059}] },
+  { id:2,  name:"Big Slide",           trailhead:"The Garden, Keene Valley",   distance_mi:7.9,  elev_gain_ft:3116, note:null,
+    peaks:[{name:"Big Slide",elev:4240}] },
+  { id:3,  name:"Giant and RPR",       trailhead:"Roaring Brook / Ridge Trail (Rt 73)", distance_mi:8.1, elev_gain_ft:4370, note:null,
+    peaks:[{name:"Giant",elev:4627},{name:"Rocky Peak Ridge",elev:4420}] },
+  { id:4,  name:"Whiteface and Esther",trailhead:"Wilmington Trail",           distance_mi:9.4,  elev_gain_ft:3651, note:null,
+    peaks:[{name:"Whiteface",elev:4867},{name:"Esther",elev:4240}] },
+  { id:5,  name:"MacIntyre Range",     trailhead:"Adirondak Loj",              distance_mi:10.6, elev_gain_ft:4376, note:null,
+    peaks:[{name:"Wright",elev:4580},{name:"Algonquin",elev:5114},{name:"Iroquois",elev:4840}] },
+  { id:6,  name:"Street & Nye",        trailhead:"Heart Lake (Adirondak Loj)", distance_mi:8.7,  elev_gain_ft:2654, note:"Bushwhack peaks — no maintained trail.",
+    peaks:[{name:"Nye",elev:3895},{name:"Street",elev:4166}] },
+  { id:7,  name:"Marshall",            trailhead:"Adirondak Loj",              distance_mi:13.9, elev_gain_ft:2890, note:"Bushwhack from Indian Pass Brook or Herbert Brook.",
+    peaks:[{name:"Marshall",elev:4360}] },
+  { id:8,  name:"Colden",             trailhead:"Adirondak Loj",              distance_mi:13.2, elev_gain_ft:3070, note:null,
+    peaks:[{name:"Colden",elev:4714}] },
+  { id:9,  name:"Tabletop & Phelps",  trailhead:"Adirondak Loj",              distance_mi:12.4, elev_gain_ft:3772, note:"Bushwhack peaks — no maintained trail.",
+    peaks:[{name:"Phelps",elev:4161},{name:"Tabletop",elev:4427}] },
+  { id:10, name:"Marcy Group",        trailhead:"Adirondak Loj",              distance_mi:18.2, elev_gain_ft:5022, note:null,
+    peaks:[{name:"Gray",elev:4840},{name:"Skylight",elev:4926},{name:"Marcy",elev:5344}] },
+  { id:11, name:"Cliff & Redfield",   trailhead:"Upper Works (Tahawus)",      distance_mi:18.6, elev_gain_ft:4068, note:"Bushwhack peaks — no maintained trail.",
+    peaks:[{name:"Cliff",elev:3960},{name:"Redfield",elev:4606}] },
+  { id:12, name:"Allen",              trailhead:"Upper Works (Tahawus)",      distance_mi:18.0, elev_gain_ft:3280, note:"Bushwhack peaks — no maintained trail.",
+    peaks:[{name:"Allen",elev:4340}] },
+  { id:13, name:"HaSaBa",            trailhead:"The Garden / Johns Brook",   distance_mi:17.1, elev_gain_ft:5065, note:null,
+    peaks:[{name:"Saddleback",elev:4515},{name:"Basin",elev:4827},{name:"Haystack",elev:4960}] },
+  { id:14, name:"Lower Great Range", trailhead:"The Garden / Johns Brook",   distance_mi:14.0, elev_gain_ft:5000, note:null,
+    peaks:[{name:"Lower Wolf Jaw",elev:4175},{name:"Upper Wolf Jaw",elev:4185},{name:"Armstrong",elev:4400},{name:"Gothics",elev:4736}] },
+  { id:15, name:"Sawteeth",          trailhead:"The Garden / AMR gate",      distance_mi:13.4, elev_gain_ft:3323, note:null,
+    peaks:[{name:"Sawteeth",elev:4100}] },
+  { id:16, name:"Colvin & Blake",    trailhead:"AMR gate (Rt 73)",           distance_mi:14.1, elev_gain_ft:4058, note:null,
+    peaks:[{name:"Blake",elev:3960},{name:"Colvin",elev:4057}] },
+  { id:17, name:"Nippletop & Dial",  trailhead:"AMR gate (Rt 73)",           distance_mi:13.3, elev_gain_ft:4163, note:null,
+    peaks:[{name:"Dial",elev:4020},{name:"Nippletop",elev:4291}] },
+  { id:18, name:"Dix Range",         trailhead:"Elk Lake Road",              distance_mi:19.0, elev_gain_ft:5134,
+    note:"Elk Lake parking lot closed in winter — park at Blue Ridge Rd and walk in; adds significant mileage.", winterOnly:true,
+    peaks:[{name:"Macomb",elev:4405},{name:"Grace Peak",elev:4012},{name:"South Dix",elev:4060},{name:"Hough",elev:4400},{name:"Dix",elev:4857}] },
+  { id:19, name:"Santanoni Range",   trailhead:"Upper Works (Tahawus)",      distance_mi:15.4, elev_gain_ft:4543, note:"Bushwhack peaks — no maintained trail.",
+    peaks:[{name:"Couchsachraga",elev:3820},{name:"Panther",elev:4442},{name:"Santanoni",elev:4607}] },
+  { id:20, name:"Seward Range",      trailhead:"Corey's Road",               distance_mi:16.1, elev_gain_ft:3956, note:"Bushwhack peaks — no maintained trail.",
+    winterNote:"Corey's Road may be closed in winter — adds significant mileage.",
+    peaks:[{name:"Emmons",elev:4040},{name:"Donaldson",elev:4140},{name:"Seward",elev:4361}] },
+  { id:21, name:"Seymour",           trailhead:"Corey's Road",               distance_mi:15.0, elev_gain_ft:2824, note:"Bushwhack peaks — no maintained trail.",
+    winterNote:"Corey's Road may be closed in winter — adds significant mileage.",
+    peaks:[{name:"Seymour",elev:4120}] },
+];
+
+const PEAK_COORDS = {
+  "Cascade":          {lat:44.2187, lon:-73.8601},
+  "Porter":           {lat:44.2124, lon:-73.8538},
+  "Big Slide":        {lat:44.1823, lon:-73.8704},
+  "Giant":            {lat:44.1613, lon:-73.7204},
+  "Rocky Peak Ridge": {lat:44.1544, lon:-73.7055},
+  "Whiteface":        {lat:44.3660, lon:-73.9030},
+  "Esther":           {lat:44.3872, lon:-73.8899},
+  // MacIntyre Range — ridge runs SW(Iroquois)→Algonquin→NE(Wright)
+  "Wright":           {lat:44.1520, lon:-73.9810},
+  "Algonquin":        {lat:44.1440, lon:-73.9870},
+  "Iroquois":         {lat:44.1370, lon:-73.9990},
+  "Nye":              {lat:44.1872, lon:-74.0238},
+  "Street":           {lat:44.1794, lon:-74.0270},
+  "Marshall":         {lat:44.1276, lon:-74.0118},
+  "Colden":           {lat:44.1270, lon:-73.9600},
+  "Phelps":           {lat:44.1570, lon:-73.9210},
+  "Tabletop":         {lat:44.1406, lon:-73.9164},
+  "Gray":             {lat:44.1110, lon:-73.9350},
+  "Skylight":         {lat:44.0990, lon:-73.9310},
+  "Marcy":            {lat:44.1130, lon:-73.9240},
+  "Cliff":            {lat:44.1031, lon:-73.9751},
+  "Redfield":         {lat:44.0950, lon:-73.9500},
+  "Allen":            {lat:44.0709, lon:-73.9399},
+  "Saddleback":       {lat:44.1260, lon:-73.8750},
+  "Basin":            {lat:44.1210, lon:-73.8870},
+  "Haystack":         {lat:44.1060, lon:-73.9010},
+  "Lower Wolf Jaw":   {lat:44.1484, lon:-73.8326},
+  "Upper Wolf Jaw":   {lat:44.1404, lon:-73.8453},
+  "Armstrong":        {lat:44.1346, lon:-73.8497},
+  "Gothics":          {lat:44.1280, lon:-73.8580},
+  "Sawteeth":         {lat:44.1139, lon:-73.8504},
+  "Blake":            {lat:44.0813, lon:-73.8445},
+  "Colvin":           {lat:44.0939, lon:-73.8343},
+  "Dial":             {lat:44.1059, lon:-73.7960},
+  "Nippletop":        {lat:44.0890, lon:-73.8160},
+  // Dix Range — geographic S→N order by latitude
+  "Macomb":           {lat:44.0520, lon:-73.7810},
+  "South Dix":        {lat:44.0601, lon:-73.7743},
+  "Hough":            {lat:44.0690, lon:-73.7780},
+  "Grace Peak":       {lat:44.0653, lon:-73.7574},
+  "Dix":              {lat:44.0824, lon:-73.7867},
+  "Couchsachraga":    {lat:44.0955, lon:-74.1603},
+  "Panther":          {lat:44.0980, lon:-74.1330},
+  "Santanoni":        {lat:44.0820, lon:-74.1310},
+  "Emmons":           {lat:44.1438, lon:-74.2143},
+  "Donaldson":        {lat:44.1540, lon:-74.2116},
+  "Seward":           {lat:44.1598, lon:-74.1993},
+  "Seymour":          {lat:44.1580, lon:-74.1726},
+};
+
+// Geographic ridge draw order where GROUPS peak order doesn't match the ridge line
+const RIDGE_DRAW_ORDER = {
+  18: ["Macomb","South Dix","Hough","Grace Peak","Dix"],
+};
+
+// Flat map of peak name → group
+const PEAK_TO_GROUP = {};
+GROUPS.forEach(g => g.peaks.forEach(p => { PEAK_TO_GROUP[p.name] = g; }));
+
+// Flat map of peak name → elevation
+const PEAK_ELEV = {};
+GROUPS.forEach(g => g.peaks.forEach(p => { PEAK_ELEV[p.name] = p.elev; }));
+
+// SVG map colors — updated by applyMode
+let mapBg = '#060c18', mapLabelColor = '#2a4a65', mapLojFill = '#1a3a60', mapLojStroke = '#2a5a8a', mapLojText = '#304a64';
+
+// Group colors for ridge lines
+const GROUP_COLORS = [
+  '#5ba3d9','#34d399','#f0b429','#a78bfa','#f87171',
+  '#38bdf8','#fb923c','#4ade80','#e879f9','#facc15',
+  '#60a5fa','#f472b6','#2dd4bf','#818cf8','#c084fc',
+  '#86efac','#fca5a5','#7dd3fc','#d8b4fe','#fde047','#a3e635'
+];
+
+// ─── Projection ─────────────────────────────────────────────────────────────
+const VB_W = 960, VB_H = 760;
+const LAT_MIN = 43.99, LAT_MAX = 44.43;
+const LON_MIN = -74.46, LON_MAX = -73.64;
+const PAD = 50;
+
+function project(lat, lon) {
+  const x = PAD + (lon - LON_MIN) / (LON_MAX - LON_MIN) * (VB_W - 2*PAD);
+  const y = PAD + (LAT_MAX - lat) / (LAT_MAX - LAT_MIN) * (VB_H - 2*PAD);
+  return [x, y];
+}
+
+// ─── State ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'adk46_v1';
+let state, winterCompletions, summerCompletions, completions, mode;
+
+function loadState() {
+  try {
+    state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  } catch(e) { state = {}; }
+  if (!state.winter) state.winter = {};
+  if (!state.summer) state.summer = {};
+  if (!state.mode)   state.mode = 'winter';
+  mode = state.mode;
+  winterCompletions = state.winter;
+  summerCompletions = state.summer;
+  completions = mode === 'winter' ? winterCompletions : summerCompletions;
+}
+
+function saveState() {
+  state.mode = mode;
+  state.winter = winterCompletions;
+  state.summer = summerCompletions;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function setMode(m) {
+  // Winter dates carry into summer where not already set (one-way only)
+  if (m === 'summer') {
+    Object.keys(winterCompletions).forEach(k => {
+      if (!summerCompletions[k]) summerCompletions[k] = winterCompletions[k];
+    });
+  }
+
+  mode = m;
+  state.mode = m;
+  completions = mode === 'winter' ? winterCompletions : summerCompletions;
+  applyMode(m);
+  saveState();
+  document.getElementById('togWinter').classList.toggle('active', m === 'winter');
+  document.getElementById('togSummer').classList.toggle('active', m === 'summer');
+  document.getElementById('titleText').textContent = m === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+  updateHeader();
+  renderMap();
+}
+
+function applyMode(m) {
+  const root = document.documentElement;
+  if (m === 'summer') {
+    root.style.setProperty('--bg',            '#0a1a0c');
+    root.style.setProperty('--card-bg',       '#0e2212');
+    root.style.setProperty('--card-border',   '#1e4028');
+    root.style.setProperty('--text',          '#d0ecda');
+    root.style.setProperty('--text-muted',    '#537560');
+    root.style.setProperty('--snow',          '#e8f5ec');
+    root.style.setProperty('--header-top',    '#091e0b');
+    root.style.setProperty('--progress-bg',   '#0e2814');
+    root.style.setProperty('--input-bg',      '#091608');
+    root.style.setProperty('--accent',        '#34d399');
+    root.style.setProperty('--accent-dark',   '#064e3b');
+    root.style.setProperty('--confirm-hover', '#0a5c38');
+    root.style.setProperty('--peak-fill',     '#34d399');
+    root.style.setProperty('--peak-glow',     'rgba(52,211,153,0.55)');
+    mapBg = '#0a1a0c'; mapLabelColor = '#2a4a30';
+    mapLojFill = '#1a3a20'; mapLojStroke = '#2a5a35'; mapLojText = '#304a38';
+    document.querySelector('#mapGlow stop:first-child').setAttribute('stop-color', '#0d3016');
+    document.querySelector('#mapGlow stop:last-child').setAttribute('stop-color', '#0a1a0c');
+  } else {
+    root.style.setProperty('--bg',            '#080d1a');
+    root.style.setProperty('--card-bg',       '#0f1827');
+    root.style.setProperty('--card-border',   '#1a2d45');
+    root.style.setProperty('--text',          '#dde6f0');
+    root.style.setProperty('--text-muted',    '#506070');
+    root.style.setProperty('--snow',          '#eaf3f8');
+    root.style.setProperty('--header-top',    '#0b1428');
+    root.style.setProperty('--progress-bg',   '#0d1e33');
+    root.style.setProperty('--input-bg',      '#070d18');
+    root.style.setProperty('--accent',        '#5ba3d9');
+    root.style.setProperty('--accent-dark',   '#1a3a60');
+    root.style.setProperty('--confirm-hover', '#1e4a78');
+    root.style.setProperty('--peak-fill',     '#5ba3d9');
+    root.style.setProperty('--peak-glow',     'rgba(91,163,217,0.55)');
+    mapBg = '#080d1a'; mapLabelColor = '#2a4a65';
+    mapLojFill = '#1a3a60'; mapLojStroke = '#2a5a8a'; mapLojText = '#304a64';
+    document.querySelector('#mapGlow stop:first-child').setAttribute('stop-color', '#0d2a4a');
+    document.querySelector('#mapGlow stop:last-child').setAttribute('stop-color', '#080d1a');
+  }
+}
+
+// ─── Date validation ─────────────────────────────────────────────────────────
+function isValidWinterDate(str) {
+  const mo = +str.slice(5,7), dy = +str.slice(8,10);
+  return (mo===1||mo===2)||(mo===12&&dy>=21)||(mo===3&&dy<=21);
+}
+
+// ─── Stats ──────────────────────────────────────────────────────────────────
+function updateHeader() {
+  const allPeaks = GROUPS.flatMap(g => g.peaks.map(p => p.name));
+  const donePeaks = allPeaks.filter(n => completions[n]);
+  const doneGroups = GROUPS.filter(g => g.peaks.every(p => completions[p.name]));
+  const doneMiles = GROUPS
+    .filter(g => g.peaks.every(p => completions[p.name]))
+    .reduce((s, g) => s + g.distance_mi, 0);
+
+  const pct = donePeaks.length / 46 * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('statPeaks').textContent = donePeaks.length;
+  document.getElementById('statGroups').textContent = doneGroups.length;
+  document.getElementById('statMiles').textContent = doneMiles.toFixed(1);
+}
+
+// ─── Map rendering ───────────────────────────────────────────────────────────
+function peakRadius(elev) {
+  if (elev >= 5000) return 10.5;
+  if (elev >= 4500) return 8;
+  return 5.5;
+}
+
+function escapeAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+}
+
+const RANGE_LABELS = [
+  { text:"MACINTYRE RANGE", lat:44.140, lon:-74.062 }, // right edge near Marshall
+  { text:"GREAT RANGE",     lat:44.130, lon:-73.800 }, // east of the range, clear of Tabletop/Phelps
+  { text:"DIX RANGE",       lat:44.037, lon:-73.775 }, // below Dix cluster
+  { text:"SEWARD RANGE",    lat:44.130, lon:-74.215 }, // above the cluster
+  { text:"SANTANONI",       lat:44.068, lon:-74.147 }, // below the range
+  { text:"CASCADE",         lat:44.232, lon:-73.858 }, // just above Cascade/Porter
+  { text:"GIANT",           lat:44.175, lon:-73.732 }, // above-left of Giant
+  { text:"WHITEFACE",       lat:44.348, lon:-73.875 }, // below Whiteface, clear of Esther
+];
+
+function renderMap() {
+  const accentFill = mode === 'winter' ? '#5ba3d9' : '#34d399';
+  const glowColor  = mode === 'winter' ? 'rgba(91,163,217,0.7)' : 'rgba(52,211,153,0.7)';
+
+  let html = '';
+
+  // Background
+  html += `<rect width="${VB_W}" height="${VB_H}" fill="${mapBg}"/>`;
+
+  // Radial glow over high peaks area
+  html += `<rect width="${VB_W}" height="${VB_H}" fill="url(#mapGlow)"/>`;
+
+  // Range labels
+  RANGE_LABELS.forEach(rl => {
+    const [lx, ly] = project(rl.lat, rl.lon);
+    html += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="8.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="600" letter-spacing="2" fill="${mapLabelColor}" fill-opacity="0.85" pointer-events="none" style="user-select:none">${escapeAttr(rl.text)}</text>`;
+  });
+
+  // Peak circles
+  GROUPS.forEach((g) => {
+    g.peaks.forEach(p => {
+      const c = PEAK_COORDS[p.name];
+      if (!c) return;
+      const [px, py] = project(c.lat, c.lon);
+      const r = peakRadius(p.elev);
+      const done = !!completions[p.name];
+      const pxS = px.toFixed(2), pyS = py.toFixed(2);
+      const nameA = escapeAttr(p.name);
+      const groupA = escapeAttr(g.name);
+
+      if (done) {
+        html += `<circle
+          cx="${pxS}" cy="${pyS}" r="${r}"
+          fill="${accentFill}"
+          stroke="${accentFill}"
+          stroke-width="1.5"
+          filter="url(#peakGlow)"
+          style="cursor:pointer"
+          data-peak="${nameA}"
+          data-group="${groupA}"
+          class="peak-dot done"/>`;
+        // Inner bright dot
+        html += `<circle cx="${pxS}" cy="${pyS}" r="${(r*0.38).toFixed(1)}" fill="white" fill-opacity="0.55" pointer-events="none"/>`;
+      } else {
+        html += `<circle
+          cx="${pxS}" cy="${pyS}" r="${r}"
+          fill="transparent"
+          stroke="#506070"
+          stroke-width="1.5"
+          style="cursor:pointer"
+          data-peak="${nameA}"
+          data-group="${groupA}"
+          class="peak-dot"/>`;
+      }
+    });
+  });
+
+  // Peak labels — hidden at default zoom, visible when zoomed in via CSS class
+  html += '<g class="peak-labels">';
+  GROUPS.forEach(g => {
+    g.peaks.forEach(p => {
+      const c = PEAK_COORDS[p.name];
+      if (!c) return;
+      const [px, py] = project(c.lat, c.lon);
+      const r = peakRadius(p.elev);
+      const done = !!completions[p.name];
+      const shortName = p.name.length > 14 ? p.name.replace(' Wolf Jaw','WJ').replace('Rocky Peak Ridge','RPR').replace('Couchsachraga','Couch.') : p.name;
+      const textColor = done ? accentFill : '#607888';
+      html += `<text x="${px.toFixed(1)}" y="${(py - r - 3).toFixed(1)}" text-anchor="middle" font-size="8" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" fill="${textColor}" pointer-events="none" style="user-select:none">${escapeAttr(shortName)}</text>`;
+    });
+  });
+  html += '</g>';
+
+  document.getElementById('mapContent').innerHTML = html;
+
+  // Attach events to peak circles
+  document.querySelectorAll('.peak-dot').forEach(el => {
+    el.addEventListener('mouseenter', onPeakEnter);
+    el.addEventListener('mouseleave', onPeakLeave);
+    el.addEventListener('click', onPeakClick);
+  });
+}
+
+// ─── Tooltip ─────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('mapTooltip');
+
+function onPeakEnter(e) {
+  const pName = e.target.dataset.peak;
+  const gName = e.target.dataset.group;
+  const elev = PEAK_ELEV[pName] || '';
+  const date = completions[pName] || null;
+  tooltip.innerHTML = `
+    <div class="tip-name">${pName}</div>
+    <div style="color:var(--text-muted);font-size:0.7rem">${elev.toLocaleString()} ft</div>
+    <div class="tip-group">${gName}</div>
+    ${date
+      ? `<div class="tip-date">Logged: ${date}</div>`
+      : `<div class="tip-cta">Click to log</div>`
+    }`;
+  tooltip.style.display = 'block';
+  positionTooltip(e);
+}
+
+function onPeakLeave() {
+  tooltip.style.display = 'none';
+}
+
+function positionTooltip(e) {
+  const tx = e.clientX + 14;
+  const ty = e.clientY - 10;
+  const tw = 200, th = 80;
+  tooltip.style.left = (tx + tw > window.innerWidth ? tx - tw - 28 : tx) + 'px';
+  tooltip.style.top  = (ty + th > window.innerHeight ? ty - th : ty) + 'px';
+}
+
+document.getElementById('mapSvg').addEventListener('mousemove', e => {
+  if (tooltip.style.display === 'block') positionTooltip(e);
+});
+
+// ─── Zoom / Pan ──────────────────────────────────────────────────────────────
+let scale = 1, tx = 0, ty = 0;
+let isPanning = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+let didPan = false;
+
+const svg = document.getElementById('mapSvg');
+const mapContent = document.getElementById('mapContent');
+
+function applyTransform() {
+  mapContent.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+  svg.classList.toggle('show-labels', scale >= 1.6);
+}
+
+function resetView() {
+  scale = 1; tx = 0; ty = 0;
+  applyTransform();
+}
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = svg.getBoundingClientRect();
+  // Mouse position in SVG viewBox coordinates before scale change
+  const svgW = rect.width, svgH = rect.height;
+  const vbW = VB_W, vbH = VB_H;
+
+  // Map client coords to viewBox coords
+  const mx = (e.clientX - rect.left) / svgW * vbW;
+  const my = (e.clientY - rect.top)  / svgH * vbH;
+
+  // Point in content space
+  const cx = (mx - tx) / scale;
+  const cy = (my - ty) / scale;
+
+  const delta = -e.deltaY * 0.001;
+  const factor = Math.exp(delta * 1.2);
+  const newScale = Math.max(0.5, Math.min(12, scale * factor));
+
+  tx = mx - cx * newScale;
+  ty = my - cy * newScale;
+  scale = newScale;
+  applyTransform();
+}, { passive: false });
+
+svg.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  isPanning = true;
+  didPan = false;
+  startX = e.clientX;
+  startY = e.clientY;
+  startTx = tx;
+  startTy = ty;
+  e.preventDefault();
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isPanning) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didPan = true;
+  const rect = svg.getBoundingClientRect();
+  const ratioX = VB_W / rect.width;
+  const ratioY = VB_H / rect.height;
+  tx = startTx + dx * ratioX;
+  ty = startTy + dy * ratioY;
+  applyTransform();
+});
+
+window.addEventListener('mouseup', () => { isPanning = false; });
+
+// ─── Modal logic ─────────────────────────────────────────────────────────────
+let modalPeakName = null, modalGroupObj = null;
+
+function onPeakClick(e) {
+  if (didPan) return;
+  const pName = e.target.dataset.peak;
+  const gName = e.target.dataset.group;
+  openModal(pName, gName);
+}
+
+function openModal(peakName, groupName) {
+  modalPeakName = peakName;
+  modalGroupObj = PEAK_TO_GROUP[peakName] || null;
+
+  document.getElementById('modalTitle').textContent = peakName;
+  document.getElementById('modalSub').textContent = groupName;
+  document.getElementById('modalDate').value = completions[peakName] || '';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('modalClearBtn').style.display = completions[peakName] ? 'inline-flex' : 'none';
+
+  // Group log button
+  const gbtn = document.getElementById('modalGroupBtn');
+  const divider = document.getElementById('modalDivider');
+  if (modalGroupObj && modalGroupObj.peaks.length > 1) {
+    gbtn.textContent = `Log all ${modalGroupObj.peaks.length} peaks in "${modalGroupObj.name}" on one date`;
+    gbtn.style.display = 'block';
+    divider.style.display = 'block';
+  } else {
+    gbtn.style.display = 'none';
+    divider.style.display = 'none';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function saveDate() {
+  const val = document.getElementById('modalDate').value;
+  const errEl = document.getElementById('modalError');
+  errEl.style.display = 'none';
+  if (!val) { errEl.textContent = 'Please select a date.'; errEl.style.display = 'block'; return; }
+  if (mode === 'winter' && !isValidWinterDate(val)) {
+    errEl.textContent = 'Winter dates must be Dec 21 – Mar 21.';
+    errEl.style.display = 'block';
+    return;
+  }
+  completions[modalPeakName] = val;
+  saveState();
+  updateHeader();
+  renderMap();
+  closeModalDirect();
+}
+
+function clearDate() {
+  delete completions[modalPeakName];
+  saveState();
+  updateHeader();
+  renderMap();
+  closeModalDirect();
+}
+
+// ─── Group modal ──────────────────────────────────────────────────────────────
+function openGroupModal() {
+  if (!modalGroupObj) return;
+  document.getElementById('groupModalTitle').textContent = modalGroupObj.name;
+  document.getElementById('groupModalSub').textContent = `Log all ${modalGroupObj.peaks.length} peaks on a single date`;
+  document.getElementById('groupModalDate').value = document.getElementById('modalDate').value || '';
+  document.getElementById('groupModalError').style.display = 'none';
+  document.getElementById('groupModalOverlay').classList.add('open');
+}
+
+function closeGroupModal(e) {
+  if (e && e.target !== document.getElementById('groupModalOverlay')) return;
+  closeGroupModalDirect();
+}
+function closeGroupModalDirect() {
+  document.getElementById('groupModalOverlay').classList.remove('open');
+}
+
+function saveGroupDate() {
+  const val = document.getElementById('groupModalDate').value;
+  const errEl = document.getElementById('groupModalError');
+  errEl.style.display = 'none';
+  if (!val) { errEl.textContent = 'Please select a date.'; errEl.style.display = 'block'; return; }
+  if (mode === 'winter' && !isValidWinterDate(val)) {
+    errEl.textContent = 'Winter dates must be Dec 21 – Mar 21.';
+    errEl.style.display = 'block';
+    return;
+  }
+  modalGroupObj.peaks.forEach(p => { completions[p.name] = val; });
+  saveState();
+  updateHeader();
+  renderMap();
+  closeGroupModalDirect();
+  closeModalDirect();
+}
+
+// ─── Export / Import ──────────────────────────────────────────────────────────
+function doExport() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'adk46_progress.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function doImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      if (!imported.winter && !imported.summer) throw new Error('Invalid format');
+      state = imported;
+      if (!state.winter) state.winter = {};
+      if (!state.summer) state.summer = {};
+      if (!state.mode) state.mode = 'winter';
+      mode = state.mode;
+      winterCompletions = state.winter;
+      summerCompletions = state.summer;
+      completions = mode === 'winter' ? winterCompletions : summerCompletions;
+      saveState();
+      applyMode(mode);
+      document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
+      document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
+      document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+      updateHeader();
+      renderMap();
+    } catch(err) {
+      alert('Import failed: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── Cross-tab sync ───────────────────────────────────────────────────────────
+window.addEventListener('storage', e => {
+  if (e.key !== 'adk46_v1') return;
+  loadState();
+  applyMode(mode);
+  document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
+  document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
+  document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+  updateHeader();
+  renderMap();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadState();
+// Remove any non-winter-valid dates from the winter store (cleanup from carryover bug)
+let _winterDirty = false;
+Object.keys(winterCompletions).forEach(k => {
+  if (!isValidWinterDate(winterCompletions[k])) { delete winterCompletions[k]; _winterDirty = true; }
+});
+if (_winterDirty) saveState();
+applyMode(mode);
+document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
+document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
+document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+updateHeader();
+renderMap();
+</script>
+</body>
+</html>

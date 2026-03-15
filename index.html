@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADK Winter 46</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080d1a;
+  --card-bg: #0f1827;
+  --card-border: #1a2d45;
+  --card-border-done: #064e3b;
+  --text: #dde6f0;
+  --text-muted: #506070;
+  --accent: #5ba3d9;
+  --accent-dark: #1a3a60;
+  --success: #34d399;
+  --success-bg: rgba(6, 78, 59, 0.4);
+  --warning: #f0b429;
+  --snow: #eaf3f8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: linear-gradient(180deg, #0b1428 0%, var(--bg) 100%);
+}
+
+.header-title h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--snow);
+  text-transform: uppercase;
+}
+.header-title p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+
+.progress-container { flex: 1 1 280px; }
+.progress-bar-wrap {
+  background: #0d1e33;
+  border-radius: 4px;
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+.progress-sub {
+  display: flex;
+  gap: 20px;
+  margin-top: 7px;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+.progress-sub b { color: var(--text); }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.btn {
+  padding: 6px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-confirm {
+  background: var(--accent-dark);
+  color: var(--snow);
+  border-color: var(--accent-dark);
+}
+.btn-confirm:hover { background: #1e4a78; }
+
+/* ── Grid ── */
+main {
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+  gap: 18px;
+}
+
+/* ── Card ── */
+.group-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 11px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.group-card:hover { border-color: #2a4a70; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.group-card.all-done { border-color: var(--card-border-done); }
+.group-card.all-done:hover { border-color: #0a7a52; }
+
+.card-svg-wrap {
+  width: 100%;
+  height: 85px;
+  display: block;
+  background: #060d1e;
+  overflow: hidden;
+}
+.card-svg-wrap svg { width: 100%; height: 85px; display: block; }
+
+.card-body { padding: 13px 15px; }
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 9px;
+}
+.card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--snow);
+  line-height: 1.3;
+}
+.card-trailhead {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.card-badge {
+  font-size: 0.67rem;
+  padding: 2px 7px;
+  border-radius: 9px;
+  background: var(--card-border);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.card-badge.done {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.card-stats {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.stat { font-size: 0.72rem; color: var(--text-muted); }
+.stat strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.card-note {
+  font-size: 0.69rem;
+  color: var(--warning);
+  margin-bottom: 9px;
+  line-height: 1.45;
+}
+
+/* ── Peak list ── */
+.peaks-list { list-style: none; }
+.peak-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  border-top: 1px solid #121e2d;
+}
+.peak-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.peak-item.done .peak-dot {
+  background: var(--success);
+  border-color: var(--success);
+}
+.peak-item-name {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.peak-item.done .peak-item-name { color: var(--success); }
+.peak-item-elev {
+  font-size: 0.67rem;
+  color: #304050;
+}
+.peak-date-btn {
+  font-size: 0.68rem;
+  background: none;
+  border: 1px dashed #1a2d45;
+  color: #405060;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.peak-date-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+.peak-date-btn.has-date {
+  border-style: solid;
+  border-color: #065f46;
+  color: var(--success);
+  background: rgba(6,78,59,0.2);
+}
+.group-log-btn {
+  width: 100%;
+  margin-bottom: 9px;
+  padding: 5px 8px;
+  background: none;
+  border: 1px dashed var(--card-border);
+  color: var(--text-muted);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.73rem;
+  transition: all 0.15s;
+  text-align: center;
+}
+.group-log-btn:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+.group-log-btn.group-done { border-style: solid; border-color: #065f46; color: var(--success); background: rgba(6,78,59,0.15); }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #0f1827;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 22px 24px;
+  width: 300px;
+  max-width: 92vw;
+}
+.modal h3 { font-size: 1rem; color: var(--snow); margin-bottom: 4px; }
+.modal .modal-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px; }
+.modal input[type="date"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: #070d18;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  color-scheme: dark;
+}
+.modal input[type="date"]:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ── Mode toggle ── */
+.mode-toggle {
+  display: flex;
+  gap: 3px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 3px;
+  flex: 0 0 auto;
+}
+.mode-tog {
+  padding: 5px 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mode-tog.active { background: var(--accent-dark); color: var(--snow); }
+.mode-tog:hover:not(.active) { color: var(--accent); }
+
+/* ── Tabs ── */
+.tab-nav { display: flex; gap: 4px; flex: 0 0 auto; }
+.tab-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.tab-btn.active { background: var(--accent-dark); color: var(--snow); border-color: var(--accent-dark); }
+.tab-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* ── Stats panel ── */
+#statsPanel { padding: 28px 32px; display: none; }
+.stats-section { margin-bottom: 40px; }
+.stats-section h2 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 8px;
+}
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 60px;
+}
+.bar-count {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  min-height: 14px;
+}
+.bar-fill {
+  width: 100%;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: 3px 3px 0 0;
+  min-height: 0;
+  transition: height 0.4s ease;
+}
+.bar-fill.empty { background: var(--card-border); opacity: 0.4; }
+.bar-label {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+  margin-top: 7px;
+  text-align: center;
+  line-height: 1.3;
+  border-top: 1px solid var(--card-border);
+  padding-top: 6px;
+  width: 100%;
+}
+.stats-empty { color: var(--text-muted); font-size: 0.85rem; padding: 20px 0; }
+.stats-toggle {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 28px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 3px;
+  width: fit-content;
+}
+.toggle-opt {
+  padding: 5px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.toggle-opt.active { background: var(--accent-dark); color: var(--snow); }
+.toggle-opt:hover:not(.active) { color: var(--accent); }
+#chartTooltip {
+  position: fixed;
+  display: none;
+  background: #0f1827;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.76rem;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 300;
+  max-width: 220px;
+  line-height: 1.85;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+}
+#chartTooltip .tip-title {
+  font-size: 0.68rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.bar-fill:not(.empty) { cursor: default; }
+.bar-fill:not(.empty):hover { filter: brightness(1.2); }
+
+/* ── Modal error ── */
+.modal-error {
+  display: none;
+  color: #f0b429;
+  font-size: 0.74rem;
+  margin-bottom: 12px;
+  padding: 7px 10px;
+  background: rgba(240,180,41,0.08);
+  border: 1px solid rgba(240,180,41,0.25);
+  border-radius: 5px;
+  line-height: 1.4;
+}
+
+/* ── Celebration overlay ── */
+#celebOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #010812;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#celebOverlay.open { display: flex; }
+
+.celeb-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.aurora {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.aurora-1 {
+  width: 140%; height: 60%;
+  top: -8%; left: -20%;
+  background: radial-gradient(ellipse 75% 55% at 50% 45%,
+    rgba(15,210,110,0.52) 0%, rgba(10,170,90,0.26) 40%, transparent 70%);
+  animation: aFlow1 11s ease-in-out infinite alternate;
+}
+.aurora-2 {
+  width: 130%; height: 55%;
+  top: 2%; left: -5%;
+  background: radial-gradient(ellipse 65% 45% at 55% 50%,
+    rgba(0,155,235,0.4) 0%, rgba(0,100,200,0.16) 45%, transparent 70%);
+  animation: aFlow2 14s ease-in-out infinite alternate;
+  animation-delay: -5s;
+}
+.aurora-3 {
+  width: 120%; height: 50%;
+  top: 6%; right: -10%;
+  background: radial-gradient(ellipse 60% 50% at 45% 45%,
+    rgba(130,35,245,0.3) 0%, rgba(90,15,200,0.13) 50%, transparent 70%);
+  animation: aFlow3 16s ease-in-out infinite alternate;
+  animation-delay: -8s;
+}
+.aurora-4 {
+  width: 100%; height: 40%;
+  top: 18%; left: 10%;
+  background: radial-gradient(ellipse 80% 55% at 50% 50%,
+    rgba(25,230,155,0.24) 0%, transparent 65%);
+  animation: aFlow1 20s ease-in-out infinite alternate;
+  animation-delay: -11s;
+}
+@keyframes aFlow1 {
+  0%   { transform: translate(0,0) scaleX(1) scaleY(1); opacity: 0.65; }
+  33%  { transform: translate(2%,3%) scaleX(1.06) scaleY(1.18); opacity: 0.92; }
+  66%  { transform: translate(-3%,5%) scaleX(0.94) scaleY(1.1); opacity: 0.76; }
+  100% { transform: translate(5%,0%) scaleX(1.1) scaleY(0.88); opacity: 0.6; }
+}
+@keyframes aFlow2 {
+  0%   { transform: translate(0,0) scaleX(1.1) scaleY(0.95); opacity: 0.55; }
+  40%  { transform: translate(-4%,4%) scaleX(0.9) scaleY(1.22); opacity: 0.84; }
+  100% { transform: translate(6%,2%) scaleX(1.05) scaleY(1.05); opacity: 0.68; }
+}
+@keyframes aFlow3 {
+  0%   { transform: translate(0,0) scaleY(1); opacity: 0.48; }
+  50%  { transform: translate(-5%,3%) scaleY(1.35); opacity: 0.8; }
+  100% { transform: translate(4%,-2%) scaleY(0.82); opacity: 0.52; }
+}
+
+#celebCanvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#celebSnow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.celeb-flake {
+  position: absolute;
+  top: -24px;
+  color: rgba(210,235,255,0.75);
+  pointer-events: none;
+  animation: flakeFall linear infinite;
+  user-select: none;
+}
+@keyframes flakeFall {
+  from { transform: translateY(-30px) rotate(0deg); opacity: 0; }
+  5%   { opacity: 1; }
+  92%  { opacity: 0.7; }
+  to   { transform: translateY(105vh) rotate(540deg); opacity: 0; }
+}
+
+.celeb-moon {
+  position: absolute;
+  top: 7%; right: 11%;
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 34%, #f4edcc, #c8b460);
+  box-shadow: 0 0 18px rgba(230,210,130,0.4), 0 0 55px rgba(230,210,130,0.15);
+  animation: moonGlow 5s ease-in-out infinite alternate;
+}
+@keyframes moonGlow {
+  from { box-shadow: 0 0 16px rgba(230,210,130,0.35), 0 0 48px rgba(230,210,130,0.12); }
+  to   { box-shadow: 0 0 26px rgba(230,210,130,0.55), 0 0 76px rgba(230,210,130,0.24); }
+}
+
+.celeb-mtn {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: auto;
+  pointer-events: none;
+}
+
+.celeb-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px;
+  margin-bottom: 21vh;
+  animation: celebEnter 0.9s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes celebEnter {
+  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.celeb-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(52,211,153,0.88);
+  margin-bottom: 16px;
+  animation: fadeUp 0.7s ease 0.15s both;
+}
+.celeb-num {
+  font-size: clamp(5.5rem, 17vw, 13rem);
+  font-weight: 900;
+  line-height: 0.88;
+  color: transparent;
+  background: linear-gradient(150deg, #f2f9ff 0%, #b8d9f5 22%, #5ba3d9 52%, #2960a0 82%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: fadeUp 0.7s ease 0.3s both, numPulse 3.5s ease-in-out 1.3s infinite;
+  letter-spacing: -0.03em;
+}
+@keyframes numPulse {
+  0%,100% { filter: drop-shadow(0 0 28px rgba(91,163,217,0.5)) drop-shadow(0 0 70px rgba(91,163,217,0.25)); }
+  50%      { filter: drop-shadow(0 0 54px rgba(91,163,217,0.82)) drop-shadow(0 0 115px rgba(91,163,217,0.45)); }
+}
+.celeb-heading {
+  font-size: clamp(1.25rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e8f4ff;
+  margin-top: 6px;
+  animation: fadeUp 0.7s ease 0.45s both;
+}
+.celeb-rule {
+  width: 52px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(91,163,217,0.9), transparent);
+  margin: 18px 0;
+  animation: fadeUp 0.7s ease 0.58s both;
+}
+.celeb-body {
+  font-size: clamp(0.82rem, 2.2vw, 1rem);
+  color: rgba(170,208,232,0.82);
+  letter-spacing: 0.05em;
+  animation: fadeUp 0.7s ease 0.68s both;
+}
+.celeb-date {
+  font-size: 0.8rem;
+  color: rgba(52,211,153,0.88);
+  margin-top: 10px;
+  letter-spacing: 0.09em;
+  animation: fadeUp 0.7s ease 0.78s both;
+  min-height: 1.2em;
+}
+.celeb-close-btn {
+  margin-top: 30px;
+  padding: 11px 38px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(91,163,217,0.35);
+  border-radius: 28px;
+  color: rgba(210,235,255,0.82);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  animation: fadeUp 0.7s ease 0.92s both;
+}
+.celeb-close-btn:hover {
+  background: rgba(91,163,217,0.14);
+  border-color: rgba(91,163,217,0.7);
+  color: #e8f4ff;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Settings panel ── */
+#settingsPanel { padding: 28px 32px; display: none; }
+.settings-section { max-width: 640px; margin-bottom: 36px; }
+.settings-section h2 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 8px;
+}
+.mode-cards { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.mode-card {
+  flex: 1 1 200px;
+  max-width: 280px;
+  padding: 16px 18px;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+.mode-card:hover { border-color: var(--accent); }
+.mode-card.selected {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--card-bg) 100%);
+}
+.mode-card-label { font-size: 0.92rem; font-weight: 700; color: var(--snow); margin-bottom: 7px; }
+.mode-card-desc { font-size: 0.74rem; color: var(--text-muted); line-height: 1.55; }
+.settings-note { font-size: 0.71rem; color: var(--text-muted); }
+
+/* ── Summer celebration ── */
+#summerCelebOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: linear-gradient(180deg, #050c18 0%, #0c1230 22%, #1a0f06 58%, #3c1a04 78%, #4a2005 100%);
+  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#summerCelebOverlay.open { display: flex; }
+
+.sc-bg { position: absolute; inset: 0; overflow: hidden; }
+
+.sc-dawn {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.sc-dawn-1 {
+  width: 140%; height: 50%;
+  bottom: 15%; left: -20%;
+  background: radial-gradient(ellipse 70% 60% at 50% 100%,
+    rgba(220,90,10,0.58) 0%, rgba(160,50,5,0.28) 45%, transparent 70%);
+  animation: dawnSwell1 12s ease-in-out infinite alternate;
+}
+.sc-dawn-2 {
+  width: 120%; height: 42%;
+  bottom: 18%; left: 10%;
+  background: radial-gradient(ellipse 65% 55% at 50% 100%,
+    rgba(255,160,20,0.42) 0%, rgba(200,100,10,0.18) 50%, transparent 70%);
+  animation: dawnSwell2 15s ease-in-out infinite alternate;
+  animation-delay: -4s;
+}
+.sc-dawn-3 {
+  width: 80%; height: 30%;
+  bottom: 20%; left: 10%;
+  background: radial-gradient(ellipse 75% 65% at 50% 100%,
+    rgba(255,210,60,0.28) 0%, transparent 65%);
+  animation: dawnSwell1 18s ease-in-out infinite alternate;
+  animation-delay: -9s;
+}
+@keyframes dawnSwell1 {
+  0%   { transform: scaleX(1) scaleY(1); opacity: 0.7; }
+  50%  { transform: scaleX(1.08) scaleY(1.15); opacity: 0.96; }
+  100% { transform: scaleX(0.94) scaleY(0.9); opacity: 0.65; }
+}
+@keyframes dawnSwell2 {
+  0%   { transform: scaleX(1.05) scaleY(0.95); opacity: 0.6; }
+  60%  { transform: scaleX(0.92) scaleY(1.2); opacity: 0.9; }
+  100% { transform: scaleX(1.1) scaleY(1.05); opacity: 0.72; }
+}
+
+#summerCanvas { position: absolute; inset: 0; pointer-events: none; }
+#summerLeaves { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.sc-leaf {
+  position: absolute;
+  top: -20px;
+  pointer-events: none;
+  animation: leafFall linear infinite;
+  user-select: none;
+}
+@keyframes leafFall {
+  from { transform: translateY(-20px) rotate(0deg) translateX(0); opacity: 0; }
+  8%   { opacity: 1; }
+  88%  { opacity: 0.85; }
+  to   { transform: translateY(105vh) rotate(480deg) translateX(55px); opacity: 0; }
+}
+
+.sc-sun-wrap {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+}
+.sc-rays {
+  position: absolute;
+  width: 360px; height: 360px;
+  left: -180px; top: -180px;
+  border-radius: 50%;
+  background: conic-gradient(
+    transparent 0deg,   rgba(255,195,40,0.13) 7deg,  transparent 15deg,
+    transparent 22deg,  rgba(255,195,40,0.1)  28deg,  transparent 36deg,
+    transparent 45deg,  rgba(255,195,40,0.13) 52deg,  transparent 60deg,
+    transparent 67deg,  rgba(255,195,40,0.09) 73deg,  transparent 82deg,
+    transparent 90deg,  rgba(255,195,40,0.13) 97deg,  transparent 105deg,
+    transparent 112deg, rgba(255,195,40,0.1)  118deg, transparent 127deg,
+    transparent 135deg, rgba(255,195,40,0.13) 142deg, transparent 150deg,
+    transparent 157deg, rgba(255,195,40,0.09) 163deg, transparent 172deg,
+    transparent 180deg, rgba(255,195,40,0.13) 187deg, transparent 195deg,
+    transparent 202deg, rgba(255,195,40,0.1)  208deg, transparent 217deg,
+    transparent 225deg, rgba(255,195,40,0.13) 232deg, transparent 240deg,
+    transparent 247deg, rgba(255,195,40,0.09) 253deg, transparent 262deg,
+    transparent 270deg, rgba(255,195,40,0.13) 277deg, transparent 285deg,
+    transparent 292deg, rgba(255,195,40,0.1)  298deg, transparent 307deg,
+    transparent 315deg, rgba(255,195,40,0.13) 322deg, transparent 330deg,
+    transparent 337deg, rgba(255,195,40,0.09) 343deg, transparent 352deg,
+    transparent 360deg
+  );
+  animation: raysSpin 38s linear infinite;
+}
+@keyframes raysSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.sc-sun {
+  position: absolute;
+  width: 78px; height: 78px;
+  left: -39px; top: -39px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 44% 41%, #fffbe0 0%, #ffe545 24%, #ff9a20 65%, #e06010 100%);
+  box-shadow: 0 0 28px rgba(255,185,30,0.78), 0 0 75px rgba(255,150,20,0.55), 0 0 160px rgba(255,110,10,0.36);
+  animation: sunPulse 4.5s ease-in-out infinite alternate;
+}
+@keyframes sunPulse {
+  from { box-shadow: 0 0 22px rgba(255,185,30,0.65), 0 0 60px rgba(255,150,20,0.44), 0 0 130px rgba(255,110,10,0.28); }
+  to   { box-shadow: 0 0 40px rgba(255,200,50,0.9),  0 0 102px rgba(255,160,30,0.66), 0 0 205px rgba(255,130,20,0.46); }
+}
+
+.sc-mtn {
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: auto;
+  pointer-events: none;
+}
+.sc-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px;
+  margin-bottom: 24vh;
+  animation: celebEnter 0.9s cubic-bezier(0.22,1,0.36,1) both;
+}
+.sc-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(120,215,100,0.9);
+  margin-bottom: 16px;
+  animation: fadeUp 0.7s ease 0.15s both;
+}
+.sc-num {
+  font-size: clamp(5.5rem, 17vw, 13rem);
+  font-weight: 900;
+  line-height: 0.88;
+  color: transparent;
+  background: linear-gradient(150deg, #f6ffe0 0%, #c8e860 18%, #78c840 42%, #4caf7d 66%, #1e6b3a 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: -0.03em;
+  animation: fadeUp 0.7s ease 0.3s both, scNumPulse 3.5s ease-in-out 1.3s infinite;
+}
+@keyframes scNumPulse {
+  0%,100% { filter: drop-shadow(0 0 28px rgba(100,200,80,0.52)) drop-shadow(0 0 70px rgba(100,200,80,0.26)); }
+  50%      { filter: drop-shadow(0 0 52px rgba(120,220,90,0.84)) drop-shadow(0 0 118px rgba(100,200,80,0.48)); }
+}
+.sc-heading {
+  font-size: clamp(1.25rem, 4.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f0f8e8;
+  margin-top: 6px;
+  animation: fadeUp 0.7s ease 0.45s both;
+}
+.sc-rule {
+  width: 52px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100,200,80,0.9), transparent);
+  margin: 18px 0;
+  animation: fadeUp 0.7s ease 0.58s both;
+}
+.sc-body {
+  font-size: clamp(0.82rem, 2.2vw, 1rem);
+  color: rgba(190,230,180,0.82);
+  letter-spacing: 0.05em;
+  animation: fadeUp 0.7s ease 0.68s both;
+}
+.sc-date {
+  font-size: 0.8rem;
+  color: rgba(120,215,100,0.9);
+  margin-top: 10px;
+  letter-spacing: 0.09em;
+  animation: fadeUp 0.7s ease 0.78s both;
+  min-height: 1.2em;
+}
+.sc-close-btn {
+  margin-top: 30px;
+  padding: 11px 38px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(100,200,80,0.35);
+  border-radius: 28px;
+  color: rgba(200,240,180,0.82);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  animation: fadeUp 0.7s ease 0.92s both;
+}
+.sc-close-btn:hover {
+  background: rgba(100,200,80,0.14);
+  border-color: rgba(100,200,80,0.7);
+  color: #f0f8e8;
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  header { padding: 14px 16px; }
+  main { padding: 14px 16px; gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>ADK Winter 46</h1>
+    <p>High Peaks Progress Tracker</p>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBarFill" style="width:0%"></div>
+    </div>
+    <div class="progress-sub">
+      <div><b id="groupsDone">0</b> / 21 hikes</div>
+      <div><b id="progressText">0</b> / 46 peaks</div>
+      <div><b id="milesDone">0</b> mi hiked</div>
+      <div><b id="gainDone">0</b> ft gained</div>
+    </div>
+  </div>
+  <div class="mode-toggle" id="modeToggle">
+    <button class="mode-tog" data-mode="summer" onclick="setMode('summer')">46er</button>
+    <button class="mode-tog active" data-mode="winter" onclick="setMode('winter')">Winter 46</button>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="tracker" onclick="switchTab('tracker')">Tracker</button>
+    <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Stats</button>
+  </nav>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="exportData()">Export</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <a href="map.html" class="btn btn-ghost">Map View</a>
+  </div>
+</header>
+
+<main id="groupGrid"></main>
+<section id="statsPanel"></section>
+<section id="settingsPanel">
+  <div class="settings-section">
+    <h2>Mode</h2>
+    <div class="mode-cards">
+      <div class="mode-card" data-mode="winter" onclick="setMode('winter')">
+        <div class="mode-card-label">Winter 46</div>
+        <div class="mode-card-desc">Restricts dates to the official winter season (Dec 21 – Mar 21). Cool blue palette with northern lights celebration.</div>
+      </div>
+      <div class="mode-card" data-mode="summer" onclick="setMode('summer')">
+        <div class="mode-card-label">46er</div>
+        <div class="mode-card-desc">Accepts any date, any season. Green palette with summer summit celebration.</div>
+      </div>
+    </div>
+    <p class="settings-note">Switching modes keeps all logged dates.</p>
+  </div>
+</section>
+
+<div id="chartTooltip"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalPeakName"></h3>
+    <div class="modal-sub" id="modalGroupName"></div>
+    <input type="date" id="modalDateInput">
+    <div class="modal-error" id="modalError"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-ghost" id="clearDateBtn" onclick="clearDate()">Clear</button>
+      <button class="btn btn-confirm" onclick="saveDate()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="summerCelebOverlay">
+  <div class="sc-bg">
+    <div class="sc-dawn sc-dawn-1"></div>
+    <div class="sc-dawn sc-dawn-2"></div>
+    <div class="sc-dawn sc-dawn-3"></div>
+    <canvas id="summerCanvas"></canvas>
+    <div id="summerLeaves"></div>
+  </div>
+  <div class="sc-sun-wrap">
+    <div class="sc-rays"></div>
+    <div class="sc-sun"></div>
+  </div>
+  <svg class="sc-mtn" id="scMtnSVG" viewBox="0 0 1440 280" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="sc-content">
+    <div class="sc-eyebrow">Adirondack High Peaks &middot; 46er</div>
+    <div class="sc-num">46</div>
+    <div class="sc-heading">Complete</div>
+    <div class="sc-rule"></div>
+    <div class="sc-body">All 46 summits earned.</div>
+    <div class="sc-date" id="scCelebDate"></div>
+    <button class="sc-close-btn" onclick="closeSummerCeleb()">Continue to tracker</button>
+  </div>
+</div>
+
+<div id="celebOverlay">
+  <div class="celeb-bg">
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+    <div class="aurora aurora-3"></div>
+    <div class="aurora aurora-4"></div>
+    <canvas id="celebCanvas"></canvas>
+    <div id="celebSnow"></div>
+  </div>
+  <div class="celeb-moon"></div>
+  <svg class="celeb-mtn" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d8eef8" stop-opacity="0.88"/>
+        <stop offset="100%" stop-color="#d8eef8" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- Far range — distant, hazy -->
+    <path d="M0,260 L0,192 Q80,168 160,150 Q210,138 260,126 Q312,114 364,102 Q406,92 450,80 Q494,68 538,76 Q580,84 620,72 Q664,60 708,52 Q750,44 794,54 Q836,64 878,54 Q922,44 966,52 Q1008,60 1052,72 Q1100,86 1150,100 Q1198,114 1248,128 Q1298,142 1352,158 Q1394,170 1440,182 L1440,260 Z"
+          fill="#0c1c32" opacity="0.55"/>
+    <!-- Snow wisps on far peaks -->
+    <path d="M446,80 Q464,68 480,74 Q470,56 456,48 Q444,42 434,48 Q424,54 412,64 Q428,74 446,80 Z" fill="url(#sg)" opacity="0.32"/>
+    <path d="M704,52 Q728,40 748,46 Q738,30 722,22 Q710,16 700,22 Q690,28 676,40 Q688,48 704,52 Z" fill="url(#sg)" opacity="0.32"/>
+    <path d="M960,52 Q984,42 1002,48 Q992,32 978,26 Q966,20 956,26 Q946,32 934,44 Q946,50 960,52 Z" fill="url(#sg)" opacity="0.32"/>
+    <!-- Mid range -->
+    <path d="M0,260 L0,222 Q52,210 100,198 Q140,188 176,196 Q208,204 238,188 Q274,170 310,178 Q342,184 370,168 Q402,150 438,156 Q470,162 502,148 Q538,134 578,142 Q612,150 644,136 Q680,120 718,130 Q752,138 786,124 Q824,110 860,118 Q894,126 928,114 Q964,102 1000,110 Q1032,118 1064,130 Q1102,144 1148,158 Q1192,170 1236,180 Q1284,190 1340,202 L1440,214 L1440,260 Z"
+          fill="#07121e" opacity="0.88"/>
+    <!-- Snow on mid peaks -->
+    <path d="M434,156 Q454,146 466,150 Q456,132 442,124 Q432,118 422,124 Q412,130 402,142 Q416,152 434,156 Z" fill="url(#sg)" opacity="0.5"/>
+    <path d="M714,130 Q736,118 750,124 Q738,106 724,98 Q712,92 702,98 Q692,104 678,116 Q694,126 714,130 Z" fill="url(#sg)" opacity="0.5"/>
+    <path d="M856,118 Q878,108 894,114 Q882,96 868,88 Q856,82 846,88 Q836,94 824,106 Q838,114 856,118 Z" fill="url(#sg)" opacity="0.5"/>
+    <path d="M996,110 Q1018,100 1034,106 Q1022,88 1008,80 Q996,74 986,80 Q976,86 964,98 Q978,106 996,110 Z" fill="url(#sg)" opacity="0.5"/>
+    <!-- Near range — dark silhouette -->
+    <path d="M0,260 L0,248 Q36,240 74,230 Q106,222 136,228 Q164,234 192,220 Q224,206 258,214 Q288,222 314,210 Q346,196 380,204 Q408,212 436,198 Q468,184 504,192 Q534,200 564,188 Q600,174 638,182 Q668,190 700,178 Q736,164 772,172 Q804,180 834,168 Q870,154 908,162 Q940,170 966,158 Q1000,146 1034,154 Q1064,162 1100,174 Q1136,186 1176,196 Q1216,206 1258,216 Q1308,226 1364,236 L1440,242 L1440,260 Z"
+          fill="#040b16"/>
+  </svg>
+  <div class="celeb-content">
+    <div class="celeb-eyebrow">Adirondack High Peaks &middot; Winter List</div>
+    <div class="celeb-num">46</div>
+    <div class="celeb-heading">Complete</div>
+    <div class="celeb-rule"></div>
+    <div class="celeb-body">All 46 summits earned in winter conditions.</div>
+    <div class="celeb-date" id="celebDate"></div>
+    <button class="celeb-close-btn" onclick="closeCeleb()">Continue to tracker</button>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+// Peaks listed in ridge/geographic order for SVG profile accuracy.
+// Winter distances include road-closure approach additions where applicable.
+
+const GROUPS = [
+  {
+    id: 1, name: "Cascade & Porter",
+    trailhead: "Rt 73 trailhead",
+    distance_mi: 5.7, elev_gain_ft: 2286, note: null,
+    peaks: [
+      { name: "Cascade", elev: 4098 },
+      { name: "Porter", elev: 4059 }
+    ]
+  },
+  {
+    id: 2, name: "Big Slide",
+    trailhead: "The Garden, Keene Valley",
+    distance_mi: 7.9, elev_gain_ft: 3116, note: null,
+    peaks: [
+      { name: "Big Slide", elev: 4240 }
+    ]
+  },
+  {
+    id: 3, name: "Giant and RPR",
+    trailhead: "Roaring Brook / Ridge Trail (Rt 73)",
+    distance_mi: 8.1, elev_gain_ft: 4370, note: null,
+    peaks: [
+      { name: "Giant", elev: 4627 },
+      { name: "Rocky Peak Ridge", elev: 4420 }
+    ]
+  },
+  {
+    id: 4, name: "Whiteface and Esther",
+    trailhead: "Wilmington Trail",
+    distance_mi: 9.4, elev_gain_ft: 3651, note: null,
+    peaks: [
+      { name: "Whiteface", elev: 4867 },
+      { name: "Esther", elev: 4240 }
+    ]
+  },
+  {
+    id: 5, name: "MacIntyre Range",
+    trailhead: "Adirondak Loj",
+    distance_mi: 10.6, elev_gain_ft: 4376, note: null,
+    peaks: [
+      { name: "Wright", elev: 4580 },
+      { name: "Algonquin", elev: 5114 },
+      { name: "Iroquois", elev: 4840 }
+    ]
+  },
+  {
+    id: 6, name: "Street & Nye",
+    trailhead: "Heart Lake (Adirondak Loj)",
+    distance_mi: 8.7, elev_gain_ft: 2654,
+    note: "Bushwhack peaks — no maintained trail.",
+    peaks: [
+      { name: "Nye", elev: 3895 },
+      { name: "Street", elev: 4166 }
+    ]
+  },
+  {
+    id: 7, name: "Marshall",
+    trailhead: "Adirondak Loj",
+    distance_mi: 13.9, elev_gain_ft: 2890,
+    note: "Bushwhack from Indian Pass Brook or Herbert Brook.",
+    peaks: [
+      { name: "Marshall", elev: 4360 }
+    ]
+  },
+  {
+    id: 8, name: "Colden",
+    trailhead: "Adirondak Loj",
+    distance_mi: 13.2, elev_gain_ft: 3070, note: null,
+    peaks: [
+      { name: "Colden", elev: 4714 }
+    ]
+  },
+  {
+    id: 9, name: "Tabletop & Phelps",
+    trailhead: "Adirondak Loj",
+    distance_mi: 12.4, elev_gain_ft: 3772,
+    note: "Bushwhack peaks — no maintained trail.",
+    peaks: [
+      { name: "Phelps", elev: 4161 },
+      { name: "Tabletop", elev: 4427 }
+    ]
+  },
+  {
+    id: 10, name: "Marcy Group",
+    trailhead: "Adirondak Loj",
+    distance_mi: 18.2, elev_gain_ft: 5022, note: null,
+    peaks: [
+      { name: "Gray", elev: 4840 },
+      { name: "Skylight", elev: 4926 },
+      { name: "Marcy", elev: 5344 }
+    ]
+  },
+  {
+    id: 11, name: "Cliff & Redfield",
+    trailhead: "Upper Works (Tahawus)",
+    distance_mi: 18.6, elev_gain_ft: 4068,
+    note: "Bushwhack peaks — no maintained trail.",
+    peaks: [
+      { name: "Cliff", elev: 3960 },
+      { name: "Redfield", elev: 4606 }
+    ]
+  },
+  {
+    id: 12, name: "Allen",
+    trailhead: "Upper Works (Tahawus)",
+    distance_mi: 18.0, elev_gain_ft: 3280,
+    note: "Bushwhack peaks — no maintained trail.",
+    peaks: [
+      { name: "Allen", elev: 4340 }
+    ]
+  },
+  {
+    id: 13, name: "HaSaBa",
+    trailhead: "The Garden / Johns Brook",
+    distance_mi: 17.1, elev_gain_ft: 5065, note: null,
+    peaks: [
+      { name: "Saddleback", elev: 4515 },
+      { name: "Basin", elev: 4827 },
+      { name: "Haystack", elev: 4960 }
+    ]
+  },
+  {
+    id: 14, name: "Lower Great Range",
+    trailhead: "The Garden / Johns Brook",
+    distance_mi: 14.0, elev_gain_ft: 5000, note: null,
+    peaks: [
+      { name: "Lower Wolf Jaw", elev: 4175 },
+      { name: "Upper Wolf Jaw", elev: 4185 },
+      { name: "Armstrong", elev: 4400 },
+      { name: "Gothics", elev: 4736 }
+    ]
+  },
+  {
+    id: 15, name: "Sawteeth",
+    trailhead: "The Garden / AMR gate",
+    distance_mi: 13.4, elev_gain_ft: 3323, note: null,
+    peaks: [
+      { name: "Sawteeth", elev: 4100 }
+    ]
+  },
+  {
+    id: 16, name: "Colvin & Blake",
+    trailhead: "AMR gate (Rt 73)",
+    distance_mi: 14.1, elev_gain_ft: 4058, note: null,
+    peaks: [
+      { name: "Blake", elev: 3960 },
+      { name: "Colvin", elev: 4057 }
+    ]
+  },
+  {
+    id: 17, name: "Nippletop & Dial",
+    trailhead: "AMR gate (Rt 73)",
+    distance_mi: 13.3, elev_gain_ft: 4163, note: null,
+    peaks: [
+      { name: "Dial", elev: 4020 },
+      { name: "Nippletop", elev: 4620 }
+    ]
+  },
+  {
+    id: 18, name: "Dix Range",
+    trailhead: "Elk Lake Road",
+    distance_mi: 19.0, elev_gain_ft: 5134,
+    note: "Elk Lake parking lot closed in winter — park at Blue Ridge Rd and walk in; adds significant mileage.", winterOnly: true,
+    peaks: [
+      { name: "Macomb", elev: 4405 },
+      { name: "Grace Peak", elev: 4012 },
+      { name: "South Dix", elev: 4060 },
+      { name: "Hough", elev: 4400 },
+      { name: "Dix", elev: 4857 }
+    ]
+  },
+  {
+    id: 19, name: "Santanoni Range",
+    trailhead: "Upper Works (Tahawus)",
+    distance_mi: 15.4, elev_gain_ft: 4543,
+    note: "Bushwhack peaks — no maintained trail.",
+    peaks: [
+      { name: "Couchsachraga", elev: 3820 },
+      { name: "Panther", elev: 4442 },
+      { name: "Santanoni", elev: 4607 }
+    ]
+  },
+  {
+    id: 20, name: "Seward Range",
+    trailhead: "Corey's Road",
+    distance_mi: 16.1, elev_gain_ft: 3956,
+    note: "Bushwhack peaks — no maintained trail.",
+    winterNote: "Corey's Road may be closed in winter — adds significant mileage.",
+    peaks: [
+      { name: "Emmons", elev: 4040 },
+      { name: "Donaldson", elev: 4140 },
+      { name: "Seward", elev: 4361 }
+    ]
+  },
+  {
+    id: 21, name: "Seymour",
+    trailhead: "Corey's Road",
+    distance_mi: 15.0, elev_gain_ft: 2824,
+    note: "Bushwhack peaks — no maintained trail.",
+    winterNote: "Corey's Road may be closed in winter — adds significant mileage.",
+    peaks: [
+      { name: "Seymour", elev: 4120 }
+    ]
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let winterCompletions = {}; // { "PeakName": "YYYY-MM-DD" } — Winter 46 store
+let summerCompletions = {}; // { "PeakName": "YYYY-MM-DD" } — 46er store
+let completions = winterCompletions; // reference to active store
+let mode = 'winter'; // 'winter' | 'summer'
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('adk46_v1');
+    if (s) {
+      const data = JSON.parse(s);
+      if (data.winter !== undefined || data.summer !== undefined) {
+        // Current format
+        winterCompletions = data.winter || {};
+        summerCompletions = data.summer || {};
+        mode = data.mode || 'winter';
+      } else if (data.completions) {
+        // Previous single-store format: seed both stores
+        winterCompletions = { ...data.completions };
+        summerCompletions = { ...data.completions };
+        mode = data.mode || 'winter';
+      } else {
+        // Oldest format: raw completions object
+        winterCompletions = { ...data };
+        summerCompletions = { ...data };
+      }
+      completions = mode === 'winter' ? winterCompletions : summerCompletions;
+    }
+  } catch(e) {}
+}
+function saveState() {
+  localStorage.setItem('adk46_v1', JSON.stringify({ winter: winterCompletions, summer: summerCompletions, mode }));
+}
+
+// ── SVG mountain profile ───────────────────────────────────────────────────────
+function buildMountainSVG(peaks, gid) {
+  const W = 280, H = 85;
+  const BASE_ELEV = 3500;
+  const TOP_PAD = 9, BOTTOM = H - 6;
+  const AVAIL_H = BOTTOM - TOP_PAD;
+  const maxElev = Math.max(...peaks.map(p => p.elev));
+  const elevRange = maxElev - BASE_ELEV;
+  const n = peaks.length;
+
+  // Star field — deterministic positions & opacity
+  const starData = [
+    [14,7],[42,11],[80,5],[118,13],[155,8],[192,12],[222,6],[252,10],
+    [28,18],[170,16],[70,21],[240,19],[100,3],[50,24]
+  ];
+  const isSummer = mode === 'summer';
+  const stars = starData.map(([x, y], i) => {
+    const op = isSummer
+      ? (0.04 + ((gid * 5 + i * 11) % 12) / 80).toFixed(2)
+      : (0.15 + ((gid * 5 + i * 11) % 12) / 30).toFixed(2);
+    const fill = isSummer ? '#ffe8a0' : '#fff';
+    return `<circle cx="${x}" cy="${y}" r="0.65" fill="${fill}" opacity="${op}"/>`;
+  }).join('');
+
+  // Peak x,y positions
+  const PAD_X = 44;
+  const usableW = W - 2 * PAD_X;
+  const pts = peaks.map((p, i) => ({
+    x: n === 1 ? W / 2 : PAD_X + (i / (n - 1)) * usableW,
+    y: TOP_PAD + AVAIL_H * (1 - (p.elev - BASE_ELEV) / elevRange)
+  }));
+
+  // Per-group col depth overrides — number applies to all cols, array applies per col (left→right)
+  // Default is 7px. Deeper = more dramatic saddle.
+  const COL_DEPTH = {
+    3:  32,       // Giant/RPR
+    16: 32,       // Colvin/Blake
+    13: [7, 18],  // HaSaBa: Saddleback-Basin normal, Basin-Haystack deeper
+    9:  20,       // Tabletop/Phelps
+  };
+  const colDepthSpec = COL_DEPTH[gid];
+  const getColDepth = (i) => Array.isArray(colDepthSpec) ? (colDepthSpec[i - 1] ?? 7) : (colDepthSpec || 7);
+
+  // Build polyline: left base → peaks with saddles → right base
+  const poly = [];
+  poly.push([0, BOTTOM]);
+  poly.push([Math.max(pts[0].x - 52, 0), BOTTOM]);
+
+  for (let i = 0; i < n; i++) {
+    if (i > 0) {
+      // Saddle point
+      const prev = pts[i - 1];
+      const cur = pts[i];
+      const sx = (prev.x + cur.x) / 2;
+      const lowerPeakY = Math.max(prev.y, cur.y);
+      poly.push([sx, Math.min(lowerPeakY + getColDepth(i), BOTTOM - 4)]);
+    }
+    poly.push([pts[i].x, pts[i].y]);
+  }
+
+  poly.push([Math.min(pts[n - 1].x + 52, W), BOTTOM]);
+  poly.push([W, BOTTOM]);
+
+  const pathD = 'M ' + poly.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L ');
+  const uid = `mg${gid}`;
+
+  const skyFill   = isSummer ? '#060d08' : '#060c1c';
+  const gradTop   = isSummer ? '#9ab870' : '#d8eaf6';
+  const gradMid   = isSummer ? '#2e5220' : '#6a9ec0';
+  const gradBot   = isSummer ? '#101e0c' : '#173050';
+  const gradMidPt = isSummer ? '55%'    : '40%';
+  const stroke    = isSummer ? '#4a6a30' : '#9cc4de';
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${W}" height="${H}" fill="${skyFill}"/>
+  ${stars}
+  <defs>
+    <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${gradTop}"/>
+      <stop offset="${gradMidPt}" stop-color="${gradMid}"/>
+      <stop offset="100%" stop-color="${gradBot}"/>
+    </linearGradient>
+  </defs>
+  <path d="${pathD} Z" fill="url(#${uid})" stroke="${stroke}" stroke-width="0.7"/>
+</svg>`;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const allPeaks = GROUPS.flatMap(g => g.peaks.map(p => p.name));
+  const total = allPeaks.length; // 46
+  const done = allPeaks.filter(n => completions[n]).length;
+  const groupsDone = GROUPS.filter(g => g.peaks.every(p => completions[p.name])).length;
+
+  // Miles and gain for completed groups
+  const completedGroups = GROUPS.filter(g => g.peaks.every(p => completions[p.name]));
+  const milesLogged = completedGroups.reduce((sum, g) => sum + g.distance_mi, 0);
+  const gainLogged = completedGroups.reduce((sum, g) => sum + g.elev_gain_ft, 0);
+
+  document.getElementById('progressText').textContent = done;
+  document.getElementById('progressBarFill').style.width = `${(done / total * 100).toFixed(1)}%`;
+  document.getElementById('groupsDone').textContent = groupsDone;
+  document.getElementById('milesDone').textContent = milesLogged.toFixed(1);
+  document.getElementById('gainDone').textContent = gainLogged.toLocaleString();
+
+  document.getElementById('groupGrid').innerHTML = GROUPS.map(g => {
+    const allDone = g.peaks.every(p => completions[p.name]);
+    const doneCt = g.peaks.filter(p => completions[p.name]).length;
+    const badge = allDone ? '&#10003; Complete' : `${doneCt}/${g.peaks.length}`;
+
+    const peaksHTML = g.peaks.map(p => {
+      const date = completions[p.name];
+      const isDone = !!date;
+      return `
+        <li class="peak-item ${isDone ? 'done' : ''}">
+          <span class="peak-dot"></span>
+          <span class="peak-item-name">${p.name}</span>
+          <span class="peak-item-elev">${p.elev.toLocaleString()}'</span>
+          <button class="peak-date-btn ${isDone ? 'has-date' : ''}"
+            onclick='openModal(${JSON.stringify(p.name)}, ${JSON.stringify(g.name)})'>
+            ${date ? fmtDate(date) : 'Log date'}
+          </button>
+        </li>`;
+    }).join('');
+
+    return `
+      <div class="group-card ${allDone ? 'all-done' : ''}">
+        <div class="card-svg-wrap">${buildMountainSVG(g.peaks, g.id)}</div>
+        <div class="card-body">
+          <div class="card-top-row">
+            <div>
+              <div class="card-name">${g.name}</div>
+              <div class="card-trailhead">${g.trailhead}</div>
+            </div>
+            <div class="card-badge ${allDone ? 'done' : ''}">${badge}</div>
+          </div>
+          <div class="card-stats">
+            <div class="stat"><strong>${g.distance_mi} mi</strong>Distance</div>
+            <div class="stat"><strong>${g.elev_gain_ft.toLocaleString()} ft</strong>Gain</div>
+            <div class="stat"><strong>${g.peaks.length}</strong>Peak${g.peaks.length !== 1 ? 's' : ''}</div>
+          </div>
+          ${g.note && (!g.winterOnly || mode === 'winter') ? `<div class="card-note">&#9651; ${g.note}</div>` : ''}
+          ${g.winterNote && mode === 'winter' ? `<div class="card-note">&#9651; ${g.winterNote}</div>` : ''}
+          <button class="group-log-btn ${allDone ? 'group-done' : ''}" onclick="openGroupModal(${g.id})">
+            ${allDone ? `All logged \u2014 ${fmtDate(g.peaks.map(p => completions[p.name]).sort()[0])}` : `Log all ${g.peaks.length} peak${g.peaks.length !== 1 ? 's' : ''} on one date`}
+          </button>
+          <ul class="peaks-list">${peaksHTML}</ul>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function fmtDate(s) {
+  const [y, m, d] = s.split('-');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${mo[+m - 1]} ${+d} '${y.slice(2)}`;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+let _peak = null, _group = null, _groupId = null, _modalMode = 'peak';
+
+function openModal(peakName, groupName) {
+  _modalMode = 'peak'; _peak = peakName; _group = groupName; _groupId = null;
+  document.getElementById('modalPeakName').textContent = peakName;
+  document.getElementById('modalGroupName').textContent = groupName;
+  document.getElementById('modalDateInput').value = completions[peakName] || '';
+  document.getElementById('clearDateBtn').style.display = completions[peakName] ? '' : 'none';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function openGroupModal(groupId) {
+  const g = GROUPS.find(g => g.id === groupId);
+  _modalMode = 'group'; _peak = null; _groupId = groupId; _group = g.name;
+  document.getElementById('modalPeakName').textContent = g.name;
+  document.getElementById('modalGroupName').textContent = `Log date for all ${g.peaks.length} peaks`;
+  const existingDates = g.peaks.map(p => completions[p.name]).filter(Boolean);
+  const allSame = existingDates.length === g.peaks.length && existingDates.every(d => d === existingDates[0]);
+  document.getElementById('modalDateInput').value = allSame ? existingDates[0] : '';
+  document.getElementById('clearDateBtn').style.display = existingDates.length > 0 ? '' : 'none';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  _peak = null; _groupId = null;
+}
+function saveDate() {
+  const v = document.getElementById('modalDateInput').value;
+  if (v) {
+    if (mode === 'winter' && !isValidWinterDate(v)) {
+      const err = document.getElementById('modalError');
+      err.textContent = 'Date must fall within the winter season (Dec 21 – Mar 21).';
+      err.style.display = 'block';
+      return;
+    }
+    const prevDone = Object.values(completions).filter(Boolean).length;
+    if (_modalMode === 'group' && _groupId !== null) {
+      const g = GROUPS.find(g => g.id === _groupId);
+      g.peaks.forEach(p => { completions[p.name] = v; });
+    } else if (_peak) {
+      completions[_peak] = v;
+    }
+    // Cross-populate: winter dates carry into 46er, winter-valid 46er dates carry into Winter 46
+    const otherStore = mode === 'winter' ? summerCompletions : winterCompletions;
+    const syncPeaks = _modalMode === 'group' && _groupId !== null
+      ? GROUPS.find(g => g.id === _groupId).peaks
+      : (_peak ? [{ name: _peak }] : []);
+    syncPeaks.forEach(({ name }) => {
+      if (!otherStore[name] && (mode === 'winter' || isValidWinterDate(v))) {
+        otherStore[name] = v;
+      }
+    });
+    saveState(); render();
+    checkCompletion(prevDone, Object.values(completions).filter(Boolean).length);
+  }
+  closeModal();
+}
+function clearDate() {
+  if (_modalMode === 'group' && _groupId !== null) {
+    const g = GROUPS.find(g => g.id === _groupId);
+    g.peaks.forEach(p => { delete completions[p.name]; });
+  } else if (_peak) {
+    delete completions[_peak];
+  }
+  saveState(); render();
+  closeModal();
+}
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeCeleb(); closeSummerCeleb(); }
+});
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+function exportData() {
+  const payload = { version: 2, exported: new Date().toISOString().slice(0, 10), winter: winterCompletions, summer: summerCompletions, mode };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `adk46_backup_${payload.exported}.json`;
+  a.click();
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.winter !== undefined || data.summer !== undefined) {
+        winterCompletions = data.winter || {};
+        summerCompletions = data.summer || {};
+        if (data.mode) mode = data.mode;
+      } else if (data.completions && typeof data.completions === 'object') {
+        winterCompletions = { ...data.completions };
+        summerCompletions = { ...data.completions };
+      } else {
+        alert('Unrecognized backup format.');
+        return;
+      }
+      completions = mode === 'winter' ? winterCompletions : summerCompletions;
+      applyMode(mode);
+      saveState();
+      render();
+    } catch { alert('Could not read file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+let _statsPeaks = {}, _statsMode = 'peaks';
+const MO_NAMES = {
+  '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
+  '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec'
+};
+
+function showBarTooltip(e, key) {
+  const peaks = _statsPeaks[key];
+  if (!peaks || !peaks.length) return;
+  const [type, val] = key.split(':');
+  const title = type === 'year' ? val : type === 'winter' ? `Winter '${val}` : MO_NAMES[val];
+  const tip = document.getElementById('chartTooltip');
+  tip.innerHTML = `<div class="tip-title">${title} &mdash; ${peaks.length} peak${peaks.length !== 1 ? 's' : ''}</div>${peaks.join('<br>')}`;
+  tip.style.display = 'block';
+  positionTip(e, tip);
+}
+function hideBarTooltip() {
+  document.getElementById('chartTooltip').style.display = 'none';
+}
+function positionTip(e, tip) {
+  const w = tip.offsetWidth || 180, h = tip.offsetHeight || 80;
+  tip.style.left = Math.min(e.clientX + 14, window.innerWidth - w - 10) + 'px';
+  tip.style.top = Math.max(e.clientY - h - 10, 10) + 'px';
+}
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('chartTooltip');
+  if (tip && tip.style.display !== 'none') positionTip(e, tip);
+});
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('groupGrid').style.display = tab === 'tracker' ? '' : 'none';
+  document.getElementById('statsPanel').style.display = tab === 'stats' ? 'block' : 'none';
+  document.getElementById('settingsPanel').style.display = tab === 'settings' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  if (tab === 'stats') renderStats();
+  if (tab === 'settings') renderSettings();
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function setStatsMode(mode) {
+  _statsMode = mode;
+  renderStats();
+}
+
+function renderStats() {
+  const panel = document.getElementById('statsPanel');
+  const isSummer = mode === 'summer';
+  const WM = ['12','01','02','03'];
+  const WINTER_MO_LABELS = [['12','Dec'],['01','Jan'],['02','Feb'],['03','Mar']];
+  const ALL_MO_LABELS = [
+    ['01','Jan'],['02','Feb'],['03','Mar'],['04','Apr'],['05','May'],['06','Jun'],
+    ['07','Jul'],['08','Aug'],['09','Sep'],['10','Oct'],['11','Nov'],['12','Dec']
+  ];
+  const MO_LABELS = isSummer ? ALL_MO_LABELS : WINTER_MO_LABELS;
+
+  function winterLabel(y, mo) {
+    if (mo === '12') return `${y.toString().slice(2)}-${(y+1).toString().slice(2)}`;
+    if (WM.slice(1).includes(mo)) return `${(y-1).toString().slice(2)}-${y.toString().slice(2)}`;
+    return null;
+  }
+
+  const initMonths = () => Object.fromEntries(MO_LABELS.map(([k]) => [k, 0]));
+
+  // ── Peaks data ──────────────────────────────────────────────────────
+  const byPeriodP = {}, byMonthP = initMonths(), peakTips = {};
+  Object.entries(completions).forEach(([peak, date]) => {
+    if (!date) return;
+    const y = parseInt(date.slice(0,4)), mo = date.slice(5,7);
+    if (byMonthP.hasOwnProperty(mo)) { byMonthP[mo]++; (peakTips['month:'+mo] = peakTips['month:'+mo]||[]).push(peak); }
+    if (isSummer) {
+      const yr = date.slice(0,4);
+      byPeriodP[yr] = (byPeriodP[yr]||0) + 1;
+      (peakTips['year:'+yr] = peakTips['year:'+yr]||[]).push(peak);
+    } else {
+      const wl = winterLabel(y, mo); if (!wl) return;
+      byPeriodP[wl] = (byPeriodP[wl]||0) + 1;
+      (peakTips['winter:'+wl] = peakTips['winter:'+wl]||[]).push(peak);
+    }
+  });
+
+  // ── Groups data ─────────────────────────────────────────────────────
+  const byPeriodG = {}, byMonthG = initMonths(), groupTips = {};
+  GROUPS.forEach(g => {
+    if (!g.peaks.every(p => completions[p.name])) return;
+    const lastDate = g.peaks.map(p => completions[p.name]).sort().pop();
+    const y = parseInt(lastDate.slice(0,4)), mo = lastDate.slice(5,7);
+    if (byMonthG.hasOwnProperty(mo)) { byMonthG[mo]++; (groupTips['month:'+mo] = groupTips['month:'+mo]||[]).push(g.name); }
+    if (isSummer) {
+      const yr = lastDate.slice(0,4);
+      byPeriodG[yr] = (byPeriodG[yr]||0) + 1;
+      (groupTips['year:'+yr] = groupTips['year:'+yr]||[]).push(g.name);
+    } else {
+      const wl = winterLabel(y, mo); if (!wl) return;
+      byPeriodG[wl] = (byPeriodG[wl]||0) + 1;
+      (groupTips['winter:'+wl] = groupTips['winter:'+wl]||[]).push(g.name);
+    }
+  });
+
+  // ── Active data ─────────────────────────────────────────────────────
+  const byPeriod  = _statsMode === 'peaks' ? byPeriodP : byPeriodG;
+  const byMonth   = _statsMode === 'peaks' ? byMonthP  : byMonthG;
+  _statsPeaks     = _statsMode === 'peaks' ? peakTips  : groupTips;
+  const periods   = Object.keys(byPeriod).sort();
+  const modeLabel = _statsMode === 'peaks' ? 'Peaks' : 'Hikes';
+  const periodLabel = isSummer ? 'Year' : 'Winter';
+  const periodTipPrefix = isSummer ? 'year' : 'winter';
+
+  // ── Chart helper ────────────────────────────────────────────────────
+  function chart(items, maxVal) {
+    if (!items.some(([,v]) => v > 0)) return '<p class="stats-empty">Nothing logged yet.</p>';
+    const MAX_H = 160;
+    return `<div class="bar-chart">${items.map(([label, val, tipKey]) => {
+      const h = maxVal > 0 && val > 0 ? Math.max(Math.round((val/maxVal)*MAX_H), 4) : 0;
+      const tip = tipKey && val > 0 ? `onmouseenter="showBarTooltip(event,'${tipKey}')" onmouseleave="hideBarTooltip()"` : '';
+      return `<div class="bar-col">
+        <div class="bar-count">${val > 0 ? val : ''}</div>
+        <div class="bar-fill ${val===0?'empty':''}" style="height:${h}px" ${tip}></div>
+        <div class="bar-label">${label}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+const maxPeriod = Math.max(...Object.values(byPeriod), 0);
+  const maxMonth  = Math.max(...MO_LABELS.map(([k]) => byMonth[k]||0), 0);
+  const doneP = Object.values(completions).filter(Boolean).length;
+  const doneG = GROUPS.filter(g => g.peaks.every(p => completions[p.name])).length;
+
+  panel.innerHTML = `
+    <div class="stats-toggle">
+      <button class="toggle-opt ${_statsMode==='peaks'?'active':''}" data-mode="peaks" onclick="setStatsMode('peaks')">Peaks</button>
+      <button class="toggle-opt ${_statsMode==='groups'?'active':''}" data-mode="groups" onclick="setStatsMode('groups')">Hikes</button>
+    </div>
+    <div class="stats-section">
+      <h2>${modeLabel} by ${periodLabel}</h2>
+      ${periods.length ? chart(periods.map(p=>[p, byPeriod[p], periodTipPrefix+':'+p]), maxPeriod) : '<p class="stats-empty">Nothing logged yet.</p>'}
+    </div>
+    <div class="stats-section">
+      <h2>${modeLabel} by Month</h2>
+      ${chart(MO_LABELS.map(([k,l])=>[l, byMonth[k]||0, 'month:'+k]), maxMonth)}
+    </div>`;
+}
+
+// ── Date validation ───────────────────────────────────────────────────────────
+function isValidWinterDate(str) {
+  if (!str) return false;
+  const mo = +str.slice(5, 7), dy = +str.slice(8, 10);
+  return (mo === 1 || mo === 2) ||
+         (mo === 12 && dy >= 21) ||
+         (mo === 3  && dy <= 21);
+}
+
+// ── Celebration ───────────────────────────────────────────────────────────────
+let _celebRaf = null;
+
+function checkCompletion(prevDone, nowDone) {
+  if (nowDone >= 46 && prevDone < 46) {
+    const lastDate = Object.values(completions).filter(Boolean).sort().pop();
+    if (mode === 'summer') {
+      setTimeout(() => openSummerCeleb(lastDate), 380);
+    } else {
+      setTimeout(() => openCeleb(lastDate), 380);
+    }
+  }
+}
+
+// ── Mode ──────────────────────────────────────────────────────────────────────
+function applyMode(m) {
+  const root = document.documentElement.style;
+  if (m === 'summer') {
+    root.setProperty('--accent', '#4caf7d');
+    root.setProperty('--accent-dark', '#1b4d30');
+    root.setProperty('--bg', '#070d07');
+    root.setProperty('--card-bg', '#0d150d');
+    root.setProperty('--card-border', '#1a2e1a');
+  } else {
+    root.removeProperty('--accent');
+    root.removeProperty('--accent-dark');
+    root.removeProperty('--bg');
+    root.removeProperty('--card-bg');
+    root.removeProperty('--card-border');
+  }
+  document.querySelector('.header-title h1').textContent =
+    m === 'summer' ? 'ADK 46er' : 'ADK Winter 46';
+  document.querySelectorAll('.mode-tog').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === m));
+}
+
+function setMode(m) {
+  // Winter dates carry into summer where not already set (one-way only)
+  if (m === 'summer') {
+    Object.keys(winterCompletions).forEach(k => {
+      if (!summerCompletions[k]) summerCompletions[k] = winterCompletions[k];
+    });
+  }
+
+  mode = m;
+  completions = m === 'winter' ? winterCompletions : summerCompletions;
+  saveState();
+  applyMode(m);
+  render();
+  if (document.getElementById('statsPanel').style.display === 'block') renderStats();
+}
+
+function renderSettings() {
+  document.querySelectorAll('.mode-card').forEach(c =>
+    c.classList.toggle('selected', c.dataset.mode === mode));
+}
+
+// ── Summer celebration ────────────────────────────────────────────────────────
+let _scRaf = null;
+
+function openSummerCeleb(lastDate) {
+  document.getElementById('summerCelebOverlay').classList.add('open');
+  document.getElementById('scCelebDate').textContent =
+    lastDate ? 'Final summit logged: ' + fmtDate(lastDate) : '';
+  document.getElementById('scMtnSVG').innerHTML = buildSummerMtnSVG();
+  initSummerCelebAnim();
+}
+
+function closeSummerCeleb() {
+  document.getElementById('summerCelebOverlay').classList.remove('open');
+  if (_scRaf) { cancelAnimationFrame(_scRaf); _scRaf = null; }
+  document.getElementById('summerLeaves').innerHTML = '';
+}
+
+function buildSummerMtnSVG() {
+  // Crest control points for the near-range silhouette
+  const crest = [
+    [0,248],[74,230],[136,228],[192,220],[258,214],[314,210],[380,204],
+    [436,198],[504,192],[564,188],[638,182],[700,178],[772,172],[834,168],
+    [908,162],[966,158],[1034,154],[1100,174],[1176,196],[1258,216],[1364,236],[1440,242]
+  ];
+  function getY(x) {
+    for (let i = 0; i < crest.length - 1; i++) {
+      if (x >= crest[i][0] && x <= crest[i+1][0]) {
+        const t = (x - crest[i][0]) / (crest[i+1][0] - crest[i][0]);
+        return crest[i][1] + t * (crest[i+1][1] - crest[i][1]);
+      }
+    }
+    return 250;
+  }
+  // Jagged conifer tree line along the near-range crest
+  const STEP = 11;
+  let tree = `M0,280 L0,${getY(0).toFixed(0)}`;
+  for (let x = 0; x <= 1440; x += STEP) {
+    const by = getY(x);
+    const h = 10 + ((x * 11 + 7) % 8);
+    tree += ` L${x},${by.toFixed(0)} L${(x + STEP / 2).toFixed(0)},${(by - h).toFixed(0)}`;
+  }
+  tree += ' L1440,280 Z';
+
+  return `
+    <path d="M0,280 L0,192 Q80,168 160,150 Q210,138 260,126 Q312,114 364,102 Q406,92 450,80 Q494,68 538,76 Q580,84 620,72 Q664,60 708,52 Q750,44 794,54 Q836,64 878,54 Q922,44 966,52 Q1008,60 1052,72 Q1100,86 1150,100 Q1198,114 1248,128 Q1298,142 1352,158 Q1394,170 1440,182 L1440,280 Z"
+          fill="#1c2e1a" opacity="0.65"/>
+    <path d="M0,280 L0,222 Q52,210 100,198 Q140,188 176,196 Q208,204 238,188 Q274,170 310,178 Q342,184 370,168 Q402,150 438,156 Q470,162 502,148 Q538,134 578,142 Q612,150 644,136 Q680,120 718,130 Q752,138 786,124 Q824,110 860,118 Q894,126 928,114 Q964,102 1000,110 Q1032,118 1064,130 Q1102,144 1148,158 Q1192,170 1236,180 Q1284,190 1340,202 L1440,214 L1440,280 Z"
+          fill="#0f1f0e" opacity="0.92"/>
+    <path d="M0,280 L0,248 Q36,240 74,230 Q106,222 136,228 Q164,234 192,220 Q224,206 258,214 Q288,222 314,210 Q346,196 380,204 Q408,212 436,198 Q468,184 504,192 Q534,200 564,188 Q600,174 638,182 Q668,190 700,178 Q736,164 772,172 Q804,180 834,168 Q868,154 908,162 Q940,170 966,158 Q1000,146 1034,154 Q1064,162 1100,174 Q1136,186 1176,196 Q1216,206 1258,216 Q1308,226 1364,236 L1440,242 L1440,280 Z"
+          fill="#080f07"/>
+    <path d="${tree}" fill="#040a04"/>`;
+}
+
+function initSummerCelebAnim() {
+  // Canvas: warm drifting light motes (fireflies / sun motes)
+  const canvas = document.getElementById('summerCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const motes = Array.from({length: 85}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * 0.84,
+    r: Math.random() * 1.8 + 0.4,
+    phase: Math.random() * Math.PI * 2,
+    freq: 0.3 + Math.random() * 0.9,
+    dx: (Math.random() - 0.5) * 0.28,
+    dy: -(Math.random() * 0.18 + 0.04),
+    hue: 55 + Math.random() * 65
+  }));
+
+  // Floating leaves
+  const leavesEl = document.getElementById('summerLeaves');
+  leavesEl.innerHTML = '';
+  const chars = ['🍃', '🍂', '🌿'];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('span');
+    el.className = 'sc-leaf';
+    el.textContent = chars[i % 3];
+    el.style.cssText = `left:${(Math.random()*102).toFixed(1)}vw;font-size:${(9+Math.random()*10).toFixed(1)}px;animation-duration:${(10+Math.random()*14).toFixed(1)}s;animation-delay:${(-Math.random()*18).toFixed(1)}s;opacity:${(0.55+Math.random()*0.35).toFixed(2)}`;
+    leavesEl.appendChild(el);
+  }
+
+  if (_scRaf) cancelAnimationFrame(_scRaf);
+  function frame(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const m of motes) {
+      m.x += m.dx; m.y += m.dy;
+      if (m.y < -10) { m.y = canvas.height * 0.84; m.x = Math.random() * canvas.width; }
+      if (m.x < -5) m.x = canvas.width + 5;
+      if (m.x > canvas.width + 5) m.x = -5;
+      const a = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(t * 0.001 * m.freq + m.phase));
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, m.r, 0, 6.2832);
+      ctx.fillStyle = `hsla(${m.hue},90%,70%,${a.toFixed(2)})`;
+      ctx.fill();
+    }
+    _scRaf = requestAnimationFrame(frame);
+  }
+  _scRaf = requestAnimationFrame(frame);
+}
+
+function openCeleb(lastDate) {
+  document.getElementById('celebOverlay').classList.add('open');
+  document.getElementById('celebDate').textContent =
+    lastDate ? 'Final summit logged: ' + fmtDate(lastDate) : '';
+  initCelebAnim();
+}
+
+function closeCeleb() {
+  document.getElementById('celebOverlay').classList.remove('open');
+  if (_celebRaf) { cancelAnimationFrame(_celebRaf); _celebRaf = null; }
+  document.getElementById('celebSnow').innerHTML = '';
+}
+
+function initCelebAnim() {
+  // Animated twinkling stars on canvas
+  const canvas = document.getElementById('celebCanvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const stars = Array.from({length: 210}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * 0.76,
+    r: Math.random() * 1.3 + 0.15,
+    phase: Math.random() * Math.PI * 2,
+    freq: 0.35 + Math.random() * 1.1
+  }));
+
+  // Snowflakes
+  const snow = document.getElementById('celebSnow');
+  snow.innerHTML = '';
+  const glyphs = ['❄','❅','❆'];
+  for (let i = 0; i < 52; i++) {
+    const el = document.createElement('span');
+    el.className = 'celeb-flake';
+    el.textContent = glyphs[i % 3];
+    el.style.cssText = `left:${(Math.random()*102).toFixed(1)}vw;font-size:${(7+Math.random()*13).toFixed(1)}px;animation-duration:${(9+Math.random()*14).toFixed(1)}s;animation-delay:${(-Math.random()*18).toFixed(1)}s;opacity:${(0.28+Math.random()*0.55).toFixed(2)}`;
+    snow.appendChild(el);
+  }
+
+  if (_celebRaf) cancelAnimationFrame(_celebRaf);
+  function frame(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      const a = 0.22 + 0.78 * (0.5 + 0.5 * Math.sin(t * 0.001 * s.freq + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, 6.2832);
+      ctx.fillStyle = `rgba(210,228,252,${a.toFixed(2)})`;
+      ctx.fill();
+    }
+    _celebRaf = requestAnimationFrame(frame);
+  }
+  _celebRaf = requestAnimationFrame(frame);
+}
+
+// ── Cross-tab sync ────────────────────────────────────────────────────────────
+window.addEventListener('storage', e => {
+  if (e.key !== 'adk46_v1') return;
+  loadState();
+  applyMode(mode);
+  render();
+  if (document.getElementById('statsPanel').style.display === 'block') renderStats();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadState();
+// Remove any non-winter-valid dates from the winter store (cleanup from carryover bug)
+let _winterDirty = false;
+Object.keys(winterCompletions).forEach(k => {
+  if (!isValidWinterDate(winterCompletions[k])) { delete winterCompletions[k]; _winterDirty = true; }
+});
+if (_winterDirty) saveState();
+applyMode(mode);
+render();
+</script>
+</body>
+</html>
