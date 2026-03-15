@@ -338,6 +338,7 @@ header {
     <button class="btn btn-ghost" onclick="doExport()">Export</button>
     <button class="btn btn-ghost" onclick="document.getElementById('importInput').click()">Import</button>
     <input type="file" id="importInput" accept=".json" onchange="doImport(event)">
+    <button id="_syncHeaderBtn" class="btn btn-ghost" onclick="openSyncModal()">⟳ Sync</button>
     <a href="index.html" class="btn btn-ghost btn-link">Card View</a>
   </div>
 </header>
@@ -402,6 +403,7 @@ header {
   </div>
 </div>
 
+<script src="sync.js"></script>
 <script>
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -562,6 +564,7 @@ function saveState() {
   state.winter = winterCompletions;
   state.summer = summerCompletions;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  syncPush();
 }
 
 function setMode(m) {
@@ -1025,6 +1028,25 @@ Object.keys(winterCompletions).forEach(k => {
 });
 if (_winterDirty) saveState();
 applyMode(mode);
+syncInit({
+  getState: () => ({ winter: winterCompletions, summer: summerCompletions, mode }),
+  setState: (data) => {
+    state.winter = winterCompletions = data.winter || {};
+    state.summer = summerCompletions = data.summer || {};
+    mode = state.mode = data.mode || 'winter';
+    completions = mode === 'winter' ? winterCompletions : summerCompletions;
+    Object.keys(winterCompletions).forEach(k => {
+      if (!isValidWinterDate(winterCompletions[k])) delete winterCompletions[k];
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    applyMode(mode);
+    document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
+    document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
+    document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';
+    updateHeader();
+    renderMap();
+  }
+});
 document.getElementById('togWinter').classList.toggle('active', mode === 'winter');
 document.getElementById('togSummer').classList.toggle('active', mode === 'summer');
 document.getElementById('titleText').textContent = mode === 'winter' ? 'ADK Winter 46' : 'ADK 46er';

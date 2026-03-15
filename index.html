@@ -943,6 +943,7 @@ main {
     <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Import</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <a href="map.html" class="btn btn-ghost">Map View</a>
+    <button id="_syncHeaderBtn" class="btn btn-ghost" onclick="openSyncModal()">⟳ Sync</button>
   </div>
 </header>
 
@@ -1052,6 +1053,7 @@ main {
   </div>
 </div>
 
+<script src="sync.js"></script>
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
 // Peaks listed in ridge/geographic order for SVG profile accuracy.
@@ -1296,6 +1298,7 @@ function loadState() {
 }
 function saveState() {
   localStorage.setItem('adk46_v1', JSON.stringify({ winter: winterCompletions, summer: summerCompletions, mode }));
+  syncPush();
 }
 
 // ── SVG mountain profile ───────────────────────────────────────────────────────
@@ -1953,6 +1956,22 @@ Object.keys(winterCompletions).forEach(k => {
 if (_winterDirty) saveState();
 applyMode(mode);
 render();
+syncInit({
+  getState: () => ({ winter: winterCompletions, summer: summerCompletions, mode }),
+  setState: (data) => {
+    winterCompletions = data.winter || {};
+    summerCompletions = data.summer || {};
+    mode = data.mode || 'winter';
+    completions = mode === 'winter' ? winterCompletions : summerCompletions;
+    Object.keys(winterCompletions).forEach(k => {
+      if (!isValidWinterDate(winterCompletions[k])) delete winterCompletions[k];
+    });
+    localStorage.setItem('adk46_v1', JSON.stringify({ winter: winterCompletions, summer: summerCompletions, mode }));
+    applyMode(mode);
+    render();
+    if (document.getElementById('statsPanel').style.display === 'block') renderStats();
+  }
+});
 </script>
 </body>
 </html>
